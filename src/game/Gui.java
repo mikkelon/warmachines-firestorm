@@ -43,7 +43,7 @@ public class Gui extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		try {
-			
+			primaryStage.setTitle("War Machines - Firestorm");
 			
 			GridPane grid = new GridPane();
 			grid.setHgap(10);
