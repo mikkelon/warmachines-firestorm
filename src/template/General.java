@@ -1,6 +1,6 @@
-package game;
+package template;
 
-public class Generel {
+public class General {
 	public static  String[] board = {    // 20x20
 			"wwwwwwwwwwwwwwwwwwww",
 			"w        ww        w",
