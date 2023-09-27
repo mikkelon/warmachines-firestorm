@@ -1,4 +1,4 @@
-package game;
+package template;
 
 public class Player {
 	String name;

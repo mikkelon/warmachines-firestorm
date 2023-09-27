@@ -1,4 +1,4 @@
-package game;
+package template;
 
 import java.util.ArrayList;
 import java.util.Iterator;
