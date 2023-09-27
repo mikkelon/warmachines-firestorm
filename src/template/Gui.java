@@ -112,13 +112,13 @@ public class Gui extends Application {
 		}
 	}
 	
-	public static void removePlayerOnScreen(pair oldpos) {
+	public static void removePlayerOnScreen(Pair oldpos) {
 		Platform.runLater(() -> {
 			fields[oldpos.getX()][oldpos.getY()].setGraphic(new ImageView(image_floor));
 			});
 	}
 	
-	public static void placePlayerOnScreen(pair newpos,String direction) {
+	public static void placePlayerOnScreen(Pair newpos, String direction) {
 		Platform.runLater(() -> {
 			int newx = newpos.getX();
 			int newy = newpos.getY();
@@ -137,7 +137,7 @@ public class Gui extends Application {
 			});
 	}
 	
-	public static void movePlayerOnScreen(pair oldpos,pair newpos,String direction)
+	public static void movePlayerOnScreen(Pair oldpos, Pair newpos, String direction)
 	{
 		removePlayerOnScreen(oldpos);
 		placePlayerOnScreen(newpos,direction);
