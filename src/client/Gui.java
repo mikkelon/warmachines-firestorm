@@ -63,13 +63,13 @@ public class Gui extends Application {
 
 			boardGrid = new GridPane();
 
-			image_wall  = new Image(getClass().getResourceAsStream("assets/image/wall4.png"),size,size,false,false);
-			image_floor = new Image(getClass().getResourceAsStream("assets/image/floor1.png"),size,size,false,false);
+			image_wall  = new Image(getClass().getResourceAsStream("assets/wall-brick2.png"),size,size,false,false);
+			image_floor = new Image(getClass().getResourceAsStream("assets/wall-stone.png"),size,size,false,false);
 
-			hero_right  = new Image(getClass().getResourceAsStream("assets/image/heroRight.png"),size,size,false,false);
-			hero_left   = new Image(getClass().getResourceAsStream("assets/image/heroLeft.png"),size,size,false,false);
-			hero_up     = new Image(getClass().getResourceAsStream("assets/image/heroUp.png"),size,size,false,false);
-			hero_down   = new Image(getClass().getResourceAsStream("assets/image/heroDown.png"),size,size,false,false);
+			hero_right  = new Image(getClass().getResourceAsStream("assets/tank1-right.png"),size,size,false,false);
+			hero_left   = new Image(getClass().getResourceAsStream("assets/tank1-left.png"),size,size,false,false);
+			hero_up     = new Image(getClass().getResourceAsStream("assets/tank1-up.png"),size,size,false,false);
+			hero_down   = new Image(getClass().getResourceAsStream("assets/tank1-down.png"),size,size,false,false);
 
 			drawMap();
 			scoreList.setEditable(false);
