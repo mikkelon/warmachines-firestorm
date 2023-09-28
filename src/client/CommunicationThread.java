@@ -9,13 +9,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
-public class ClientThread extends Thread {
+public class CommunicationThread extends Thread {
 
     private static DataOutputStream outToServer;
-    private String navn;
+    private String name;
 
-    public ClientThread(String navn) {
-        this.navn = navn;
+    public CommunicationThread(String name) {
+        this.name = name;
     }
 
     @Override
@@ -26,7 +26,7 @@ public class ClientThread extends Thread {
             Socket clientSocket = new Socket("localhost", 6789);
             BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             outToServer = new DataOutputStream(clientSocket.getOutputStream());
-            outToServer.writeBytes("login " + navn + '\n');
+            outToServer.writeBytes("login " + name + '\n');
             while (true) {
                 String updateFromServer = inFromServer.readLine();
                 System.out.println(updateFromServer);
@@ -44,7 +44,7 @@ public class ClientThread extends Thread {
     public static void writeToServer(String command) {
         if (outToServer != null) {
             try {
-                outToServer.writeBytes(command + "\n");
+                outToServer.writeBytes(command + "\n"); // TODO: command needs to have a name
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

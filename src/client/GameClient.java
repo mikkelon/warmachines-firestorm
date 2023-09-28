@@ -14,7 +14,7 @@ public class GameClient {
         String navn = inFromUser.readLine();
         System.out.println("Connecting to server...");
 
-        new ClientThread(navn).start();
+        new CommunicationThread(navn).start();
         Application.launch(Gui.class);
     }
 }

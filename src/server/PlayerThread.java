@@ -33,19 +33,14 @@ public class PlayerThread extends Thread {
                     String command = inFromClient.readLine();
                     System.out.println(command);
                     if (command.startsWith("move ")) {
-                        Game.movePlayer(player, command.substring(5));
+                        String direction = command.substring(5);
+                        Game.movePlayer(player, direction);
                     }
                 }
             }
-
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public Player getPlayer() {
-        return player;
     }
 
     public void setPlayer(Player player) {

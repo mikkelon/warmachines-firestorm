@@ -86,10 +86,10 @@ public class Gui extends Application {
 
 			scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
 				switch (event.getCode()) {
-				case UP:    ClientThread.writeToServer("move up");    break;
-				case DOWN:  ClientThread.writeToServer("move down");  break;
-				case LEFT:  ClientThread.writeToServer("move left");  break;
-				case RIGHT: ClientThread.writeToServer("move right"); break;
+				case UP:    CommunicationThread.writeToServer("move up");    break;
+				case DOWN:  CommunicationThread.writeToServer("move down");  break;
+				case LEFT:  CommunicationThread.writeToServer("move left");  break;
+				case RIGHT: CommunicationThread.writeToServer("move right"); break;
 				case ESCAPE:System.exit(0);
 				default: break;
 				}
