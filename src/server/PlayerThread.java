@@ -24,10 +24,15 @@ public class PlayerThread extends Thread {
     public void run() {
         try {
             String login = inFromClient.readLine();
+            System.out.println(login);
             if (login.startsWith("login ")) {
                 player = Game.addThread(this, login.substring(6));
                 while(true) {
-
+                    String command = inFromClient.readLine();
+                    System.out.println(command);
+                    if (command.startsWith("move ")) {
+                        Game.movePlayer(player, command.substring(5));
+                    }
                 }
             }
 
@@ -35,6 +40,13 @@ public class PlayerThread extends Thread {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
 
+    public Player getPlayer() {
+        return player;
+    }
+
+    public DataOutputStream getOutputStream() {
+        return outToClient;
     }
 }

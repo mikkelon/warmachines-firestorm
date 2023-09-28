@@ -3,25 +3,30 @@ package server;
 import model.GameConstants;
 import model.Pair;
 import model.Player;
+import org.json.JSONObject;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
 public class Game {
-    private static Set<PlayerThread> playerThreads;
+    private static Set<Player> players = new HashSet<>();
+    private static Set<DataOutputStream> outputStreams = new HashSet<>();
+
 
     synchronized public static Player addThread(PlayerThread playerThread, String name) {
         Pair p = getRandomFreePosition();
         Player player = new Player(name, p, "up");
-        playerThreads.add(playerThread);
+        players.add(playerThread.getPlayer());
+        outputStreams.add(playerThread.getOutputStream());
         return player;
     }
 
-    synchronized public static void removeThread(PlayerThread playerThread) {
-        playerThreads.remove(playerThread);
-    }
 
-    synchronized private static void movePlayer(Player player, String direction) {
+    synchronized public static void movePlayer(Player player, String direction) {
         player.setDirection(direction);
         int x = player.getXpos(), y = player.getYpos();
         int delta_x = 0, delta_y = 0;
@@ -41,17 +46,15 @@ public class Game {
             Pair oldpos = player.getLocation();
             Pair newpos = new Pair(x + delta_x, y + delta_y);
             player.setLocation(newpos);
-            // TODO: update clients
+            try {
+                sendToAllClients();
+            }
+            catch (IOException e){
+                throw new RuntimeException(e);
+            }
         }
     }
 
-    public static Player makePlayer(String name) {
-
-    }
-
-    synchronized public static void newPlayer(PlayerThread playerThread) {
-        addThread(playerThread);
-    }
 
     public static Pair getRandomFreePosition()
     // finds a random new position which is not wall
@@ -64,14 +67,13 @@ public class Game {
             Random r = new Random();
             x = Math.abs(r.nextInt() % 18) + 1;
             y = Math.abs(r.nextInt() % 18) + 1;
-            if (General.board[y].charAt(x) == ' ') // er det gulv ?
+            if (GameConstants.board[y].charAt(x) == ' ') // er det gulv ?
             {
                 foundfreepos = true;
-                for (Player p : players) {
+                for (Player p: players) {
                     if (p.getXpos() == x && p.getYpos() == y) //pladsen optaget af en anden
                         foundfreepos = false;
                 }
-
             }
         }
         Pair p = new Pair(x, y);
@@ -86,4 +88,14 @@ public class Game {
         }
         return null;
     }
+
+    private static void sendToAllClients() throws IOException {
+        DataTransferObject dataTransferObject = new DataTransferObject(players);
+        JSONObject jsonObject = new JSONObject(dataTransferObject);
+        for (DataOutputStream outputStream: outputStreams){
+            outputStream.writeBytes(jsonObject + "\n");
+        }
+    }
+
+
 }
