@@ -1,9 +1,9 @@
-package game;
+package template;
 
-public class pair {
+public class Pair {
 	int x;
 	int y;
-	public pair(int x, int y) {
+	public Pair(int x, int y) {
 		super();
 		this.x = x;
 		this.y = y;

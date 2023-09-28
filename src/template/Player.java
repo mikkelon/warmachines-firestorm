@@ -1,23 +1,23 @@
-package game;
+package template;
 
 public class Player {
 	String name;
-	pair location;
+	Pair location;
 	int point;
 	String direction;
 
-	public Player(String name, pair loc, String direction) {
+	public Player(String name, Pair loc, String direction) {
 		this.name = name;
 		this.location = loc;
 		this.direction = direction;
 		this.point = 0;
 	};
 	
-	public pair getLocation() {
+	public Pair getLocation() {
 		return this.location;
 	}
 
-	public void setLocation(pair p) {
+	public void setLocation(Pair p) {
 		this.location=p;
 	}
 

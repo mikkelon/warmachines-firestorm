@@ -1,7 +1,4 @@
-package game;
-
-import java.util.*;
-import java.util.List;
+package template;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -12,7 +9,6 @@ import javafx.scene.control.*;
 import javafx.scene.image.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
-import javafx.scene.paint.Color;
 import javafx.scene.text.*;
 
 public class Gui extends Application {
@@ -71,14 +67,14 @@ public class Gui extends Application {
 			fields = new Label[20][20];
 			for (int j=0; j<20; j++) {
 				for (int i=0; i<20; i++) {
-					switch (Generel.board[j].charAt(i)) {
+					switch (General.board[j].charAt(i)) {
 					case 'w':
 						fields[i][j] = new Label("", new ImageView(image_wall));
 						break;
 					case ' ':					
 						fields[i][j] = new Label("", new ImageView(image_floor));
 						break;
-					default: throw new Exception("Illegal field value: "+Generel.board[j].charAt(i) );
+					default: throw new Exception("Illegal field value: "+ General.board[j].charAt(i) );
 					}
 					boardGrid.add(fields[i][j], i, j);
 				}
@@ -116,13 +112,13 @@ public class Gui extends Application {
 		}
 	}
 	
-	public static void removePlayerOnScreen(pair oldpos) {
+	public static void removePlayerOnScreen(Pair oldpos) {
 		Platform.runLater(() -> {
 			fields[oldpos.getX()][oldpos.getY()].setGraphic(new ImageView(image_floor));
 			});
 	}
 	
-	public static void placePlayerOnScreen(pair newpos,String direction) {
+	public static void placePlayerOnScreen(Pair newpos, String direction) {
 		Platform.runLater(() -> {
 			int newx = newpos.getX();
 			int newy = newpos.getY();
@@ -141,7 +137,7 @@ public class Gui extends Application {
 			});
 	}
 	
-	public static void movePlayerOnScreen(pair oldpos,pair newpos,String direction)
+	public static void movePlayerOnScreen(Pair oldpos, Pair newpos, String direction)
 	{
 		removePlayerOnScreen(oldpos);
 		placePlayerOnScreen(newpos,direction);

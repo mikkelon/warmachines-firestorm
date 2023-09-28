@@ -1,6 +1,5 @@
-package game;
+package template;
 
-import java.net.*;
 import java.io.*;
 import javafx.application.Application;
 
