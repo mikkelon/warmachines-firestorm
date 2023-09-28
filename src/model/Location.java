@@ -1,9 +1,9 @@
 package model;
 
-public class Pair {
+public class Location {
 	int x;
 	int y;
-	public Pair(int x, int y) {
+	public Location(int x, int y) {
 		super();
 		this.x = x;
 		this.y = y;

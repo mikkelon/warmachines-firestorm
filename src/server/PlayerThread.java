@@ -26,7 +26,8 @@ public class PlayerThread extends Thread {
             String login = inFromClient.readLine();
             System.out.println(login);
             if (login.startsWith("login ")) {
-                player = Game.addThread(this, login.substring(6));
+                Game.addThread(this, login.substring(6));
+                this.setName("Thread-" + player.getName());
                 while(true) {
                     String command = inFromClient.readLine();
                     System.out.println(command);
@@ -44,6 +45,10 @@ public class PlayerThread extends Thread {
 
     public Player getPlayer() {
         return player;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
     }
 
     public DataOutputStream getOutputStream() {

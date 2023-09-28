@@ -1,33 +1,36 @@
 package server;
 
 import model.GameConstants;
-import model.Pair;
+import model.Location;
 import model.Player;
 import org.json.JSONObject;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 public class Game {
-    private static Set<Player> players = new HashSet<>();
-    private static Set<DataOutputStream> outputStreams = new HashSet<>();
+    private static List<Player> players = new ArrayList<>();
+    private static List<DataOutputStream> outputStreams = new ArrayList<>();
 
 
-    synchronized public static Player addThread(PlayerThread playerThread, String name) {
-        Pair p = getRandomFreePosition();
+    synchronized public static void addThread(PlayerThread playerThread, String name) throws IOException {
+        Location p = getRandomFreePosition();
         Player player = new Player(name, p, "up");
-        players.add(playerThread.getPlayer());
+        players.add(player);
+        playerThread.setPlayer(player);
         outputStreams.add(playerThread.getOutputStream());
-        return player;
+        sendToAllClients();
     }
 
 
     synchronized public static void movePlayer(Player player, String direction) {
+        // If player direction changed, send update to all clients
+        boolean sendToClient = !player.getDirection().equals(direction);
+
+        // Update player direction
         player.setDirection(direction);
+
         int x = player.getXpos(), y = player.getYpos();
         int delta_x = 0, delta_y = 0;
 
@@ -42,21 +45,24 @@ public class Game {
         }
 
         if (!(GameConstants.board[y + delta_y].charAt(x + delta_x) == 'w')
-                || getPlayerAt(x + delta_x, y + delta_y) == null) {
-            Pair oldpos = player.getLocation();
-            Pair newpos = new Pair(x + delta_x, y + delta_y);
-            player.setLocation(newpos);
+                && getPlayerAt(x + delta_x, y + delta_y) == null) {
+            Location newpos = new Location(x + delta_x, y + delta_y);
+            player.setCurrentLocation(newpos);
+            sendToClient = true; // Player moved, send update to all clients
+        }
+
+        // If player moved or changed direction, send update to all clients
+        if (sendToClient) {
             try {
                 sendToAllClients();
-            }
-            catch (IOException e){
-                throw new RuntimeException(e);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
 
 
-    public static Pair getRandomFreePosition()
+    public static Location getRandomFreePosition()
     // finds a random new position which is not wall
     // and not occupied by other players
     {
@@ -76,7 +82,7 @@ public class Game {
                 }
             }
         }
-        Pair p = new Pair(x, y);
+        Location p = new Location(x, y);
         return p;
     }
 
@@ -92,6 +98,7 @@ public class Game {
     private static void sendToAllClients() throws IOException {
         DataTransferObject dataTransferObject = new DataTransferObject(players);
         JSONObject jsonObject = new JSONObject(dataTransferObject);
+        System.out.println(jsonObject);
         for (DataOutputStream outputStream: outputStreams){
             outputStream.writeBytes(jsonObject + "\n");
         }

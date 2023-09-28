@@ -2,36 +2,47 @@ package model;
 
 public class Player {
 	private String name;
-	private Pair location;
+	private Location currentLocation;
+	private Location lastLocation;
 	private int point;
 	private String direction;
 
-	public Player(String name, Pair loc, String direction) {
+	public Player(String name, Location loc, String direction) {
 		this.name = name;
-		this.location = loc;
+		this.currentLocation = loc;
+		this.lastLocation = loc;
 		this.direction = direction;
 		this.point = 0;
 	};
-	
-	public Pair getLocation() {
-		return this.location;
+
+	public String getName() {
+		return name;
 	}
 
-	public void setLocation(Pair p) {
-		this.location=p;
+	public Location getCurrentLocation() {
+		return this.currentLocation;
+	}
+
+	public void setCurrentLocation(Location location) {
+		this.lastLocation = this.currentLocation;
+		this.currentLocation = location;
+	}
+
+	public Location getLastLocation() {
+		return lastLocation;
 	}
 
 	public int getXpos() {
-		return location.x;
+		return currentLocation.x;
 	}
 	public void setXpos(int xpos) {
-		this.location.x = xpos;
+		this.currentLocation.x = xpos;
 	}
 	public int getYpos() {
-		return location.y;
+		return currentLocation.y;
 	}
 	public void setYpos(int ypos) {
-		this.location.y = ypos;
+		this.currentLocation.y = ypos;
 	}
 	public String getDirection() {
 		return direction;

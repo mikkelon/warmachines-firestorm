@@ -15,7 +15,10 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import model.GameConstants;
-import model.Pair;
+import model.Location;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 public class Gui extends Application {
 
 	public static final int size = 30; 
@@ -30,10 +33,9 @@ public class Gui extends Application {
 
 	private static Label[][] fields;
 	private TextArea scoreList;
-	
+	private static GridPane boardGrid;
 
 
-	
 	// -------------------------------------------
 	// | Maze: (0,0)              | Score: (1,0) |
 	// |-----------------------------------------|
@@ -58,32 +60,18 @@ public class Gui extends Application {
 			scoreLabel.setFont(Font.font("Arial", FontWeight.BOLD, 20));
 
 			scoreList = new TextArea();
-			
-			GridPane boardGrid = new GridPane();
 
-			image_wall  = new Image(getClass().getResourceAsStream("Image/wall4.png"),size,size,false,false);
-			image_floor = new Image(getClass().getResourceAsStream("Image/floor1.png"),size,size,false,false);
+			boardGrid = new GridPane();
 
-			hero_right  = new Image(getClass().getResourceAsStream("Image/heroRight.png"),size,size,false,false);
-			hero_left   = new Image(getClass().getResourceAsStream("Image/heroLeft.png"),size,size,false,false);
-			hero_up     = new Image(getClass().getResourceAsStream("Image/heroUp.png"),size,size,false,false);
-			hero_down   = new Image(getClass().getResourceAsStream("Image/heroDown.png"),size,size,false,false);
+			image_wall  = new Image(getClass().getResourceAsStream("assets/image/wall4.png"),size,size,false,false);
+			image_floor = new Image(getClass().getResourceAsStream("assets/image/floor1.png"),size,size,false,false);
 
-			fields = new Label[20][20];
-			for (int j=0; j<20; j++) {
-				for (int i=0; i<20; i++) {
-					switch (GameConstants.board[j].charAt(i)) {
-					case 'w':
-						fields[i][j] = new Label("", new ImageView(image_wall));
-						break;
-					case ' ':					
-						fields[i][j] = new Label("", new ImageView(image_floor));
-						break;
-					default: throw new Exception("Illegal field value: "+ GameConstants.board[j].charAt(i) );
-					}
-					boardGrid.add(fields[i][j], i, j);
-				}
-			}
+			hero_right  = new Image(getClass().getResourceAsStream("assets/image/heroRight.png"),size,size,false,false);
+			hero_left   = new Image(getClass().getResourceAsStream("assets/image/heroLeft.png"),size,size,false,false);
+			hero_up     = new Image(getClass().getResourceAsStream("assets/image/heroUp.png"),size,size,false,false);
+			hero_down   = new Image(getClass().getResourceAsStream("assets/image/heroDown.png"),size,size,false,false);
+
+			drawMap();
 			scoreList.setEditable(false);
 			
 			
@@ -98,11 +86,11 @@ public class Gui extends Application {
 
 			scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
 				switch (event.getCode()) {
-				case UP:    playerMoved(0,-1,"up");    break;
-				case DOWN:  playerMoved(0,+1,"down");  break;
-				case LEFT:  playerMoved(-1,0,"left");  break;
-				case RIGHT: playerMoved(+1,0,"right"); break;
-				case ESCAPE:System.exit(0); 
+				case UP:    GameClient.writeToServer("move up");    break;
+				case DOWN:  GameClient.writeToServer("move down");  break;
+				case LEFT:  GameClient.writeToServer("move left");  break;
+				case RIGHT: GameClient.writeToServer("move right"); break;
+				case ESCAPE:System.exit(0);
 				default: break;
 				}
 			});
@@ -116,14 +104,45 @@ public class Gui extends Application {
 			e.printStackTrace();
 		}
 	}
-	
-	public static void removePlayerOnScreen(Pair oldpos) {
+
+	private static void drawMap() throws Exception {
+		fields = new Label[20][20];
+		for (int j=0; j<20; j++) {
+			for (int i=0; i<20; i++) {
+				switch (GameConstants.board[j].charAt(i)) {
+					case 'w':
+						fields[i][j] = new Label("", new ImageView(image_wall));
+						break;
+					case ' ':
+						fields[i][j] = new Label("", new ImageView(image_floor));
+						break;
+					default: throw new Exception("Illegal field value: "+ GameConstants.board[j].charAt(i) );
+				}
+				boardGrid.add(fields[i][j], i, j);
+			}
+		}
+	}
+
+	public static void updateGame(JSONArray players) {
+		for (int i=0;i<players.length();i++) {
+			JSONObject player = players.getJSONObject(i);
+			System.out.println(player);
+			String direction = player.getString("direction");
+			JSONObject jsonCurrLoc = player.getJSONObject("currentLocation");
+			JSONObject jsonLastLoc = player.getJSONObject("lastLocation");
+			Location currLoc = new Location(jsonCurrLoc.getInt("x"),jsonCurrLoc.getInt("y"));
+			Location lastLoc = new Location(jsonLastLoc.getInt("x"),jsonLastLoc.getInt("y"));
+			movePlayerOnScreen(lastLoc, currLoc, direction);
+		}
+	}
+
+	public static void removePlayerOnScreen(Location oldpos) {
 		Platform.runLater(() -> {
 			fields[oldpos.getX()][oldpos.getY()].setGraphic(new ImageView(image_floor));
 			});
 	}
-	
-	public static void placePlayerOnScreen(Pair newpos, String direction) {
+
+	public static void placePlayerOnScreen(Location newpos, String direction) {
 		Platform.runLater(() -> {
 			int newx = newpos.getX();
 			int newy = newpos.getY();
@@ -141,8 +160,8 @@ public class Gui extends Application {
 			};
 			});
 	}
-	
-	public static void movePlayerOnScreen(Pair oldpos, Pair newpos, String direction)
+
+	public static void movePlayerOnScreen(Location oldpos, Location newpos, String direction)
 	{
 		removePlayerOnScreen(oldpos);
 		placePlayerOnScreen(newpos,direction);
