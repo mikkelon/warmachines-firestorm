@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/Template/Template.iml" filepath="$PROJECT_DIR$/Template/Template.iml" />
       <module fileurl="file://$PROJECT_DIR$/warmachines-firestorm.iml" filepath="$PROJECT_DIR$/warmachines-firestorm.iml" />
     </modules>
   </component>
