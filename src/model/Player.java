@@ -8,15 +8,7 @@ public class Player extends GameObject {
 		super(location, direction);
 		this.name = name;
 		this.point = 0;
-	};
-
-	public Player(String name, Location loc, Location lastLoc, String direction) {
-		this.name = name;
-		this.currentLocation = loc;
-		this.lastLocation = lastLoc;
-		this.direction = direction;
-		this.point = 0;
-	};
+	}
 
 	public String getName() {
 		return name;

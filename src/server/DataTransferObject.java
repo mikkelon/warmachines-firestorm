@@ -11,8 +11,7 @@ public class DataTransferObject {
     private Player loggedOutPlayer = null;
     private List<Shell> shells;
 
-    public DataTransferObject(List<Player> players, Player loggedOutPlayer) {
-    public DataTransferObject(List<Player> players, List<Shell> shells) {
+    public DataTransferObject(List<Player> players, Player loggedOutPlayer, List<Shell> shells) {
         this.players = players;
         this.loggedOutPlayer = loggedOutPlayer;
         this.shells = shells;
