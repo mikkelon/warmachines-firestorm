@@ -35,6 +35,9 @@ public class PlayerThread extends Thread {
                     if (command.startsWith("move ")) {
                         String direction = command.substring(5);
                         Game.movePlayer(player, direction);
+                    } else if (command.equals("fire")) {
+                        System.out.println("SHOTS FIRED");
+                        Game.fire(player);
                     }
                 }
             }

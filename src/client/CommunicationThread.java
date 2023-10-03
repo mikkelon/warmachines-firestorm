@@ -12,10 +12,12 @@ import java.net.Socket;
 public class CommunicationThread extends Thread {
 
     private static DataOutputStream outToServer;
+    private final String ip;
     private String name;
 
-    public CommunicationThread(String name) {
+    public CommunicationThread(String name, String ip) {
         this.name = name;
+        this.ip = ip;
     }
 
     @Override
@@ -23,7 +25,7 @@ public class CommunicationThread extends Thread {
         try {
             Thread.sleep(1000);
 
-            Socket clientSocket = new Socket("localhost", 6789);
+            Socket clientSocket = new Socket(ip, 6789);
             BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             outToServer = new DataOutputStream(clientSocket.getOutputStream());
             outToServer.writeBytes("login " + name + '\n');
