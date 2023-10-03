@@ -2,18 +2,20 @@ package server;
 
 import model.Shell;
 
-public class ShellThread extends Thread {
-    private Shell shell;
+import java.util.ArrayList;
+import java.util.Iterator;
 
-    public ShellThread(Shell shell) {
-        this.shell = shell;
-    }
+
+public class ShellThread extends Thread {
 
     @Override
     public void run() {
         while (true) {
             try {
-                Game.moveShell(shell);
+                ArrayList<Shell> shells= new ArrayList<>(Game.getShells());
+                for(Shell shell : shells){
+                    Game.moveShell(shell);
+                }
                 Thread.sleep(500);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);

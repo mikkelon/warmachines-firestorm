@@ -70,7 +70,7 @@ public class Game {
             if (GameConstants.board[y].charAt(x) == ' ') // er det gulv ?
             {
                 foundfreepos = true;
-                for (Player p: players) {
+                for (Player p : players) {
                     if (p.getXpos() == x && p.getYpos() == y) //pladsen optaget af en anden
                         foundfreepos = false;
                 }
@@ -94,7 +94,11 @@ public class Game {
         String direction = player.getDirection();
         Shell shell = new Shell(location, direction);
         shells.add(shell);
-        new ShellThread(shell).start();
+
+    }
+
+    public static List<Shell> getShells() {
+        return shells;
     }
 
     public static void moveShell(Shell shell) {
@@ -112,8 +116,14 @@ public class Game {
         boolean isPlayer = getPlayerAt(x + delta_x, y + delta_y) != null;
 
         if (isPlayer) {
+            // TODO: remove shell, transfer points
+            shells.remove(shell);
+
 
         } else if (isWall) {
+            // TODO: remove shell
+            shells.remove(shell);
+
 
         } else {
             Location newpos = new Location(x + delta_x, y + delta_y);
@@ -127,7 +137,7 @@ public class Game {
             DataTransferObject dataTransferObject = new DataTransferObject(players, shells);
             JSONObject jsonObject = new JSONObject(dataTransferObject);
             System.out.println(jsonObject);
-            for (DataOutputStream outputStream: outputStreams){
+            for (DataOutputStream outputStream : outputStreams) {
                 outputStream.writeBytes(jsonObject + "\n");
             }
         } catch (IOException e) {
