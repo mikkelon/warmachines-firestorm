@@ -26,25 +26,21 @@ public class PlayerThread extends Thread {
             String login = inFromClient.readLine();
             System.out.println(login);
             if (login.startsWith("login ")) {
-                Game.addThread(this, login.substring(6));
+                String name = login.substring(6);
+                Game.addThread(this, name);
                 this.setName("Thread-" + player.getName());
                 while(true) {
                     String command = inFromClient.readLine();
                     System.out.println(command);
                     if (command.startsWith("move ")) {
-                        Game.movePlayer(player, command.substring(5));
+                        String direction = command.substring(5);
+                        Game.movePlayer(player, direction);
                     }
                 }
             }
-
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public Player getPlayer() {
-        return player;
     }
 
     public void setPlayer(Player player) {

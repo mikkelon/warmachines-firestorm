@@ -7,10 +7,10 @@ import java.net.Socket;
 public class GameServer {
     public static void main(String[] args) throws IOException {
         ServerSocket welcomeSocket = new ServerSocket(6789);
-        System.out.println("Server started at port " + welcomeSocket.getLocalPort());
+        System.out.println("Server listening on port " + welcomeSocket.getLocalPort() + "...");
         while (true) {
             Socket connectionSocket = welcomeSocket.accept();
-            System.out.println("New connection");
+            System.out.println("New connection " + connectionSocket.getInetAddress() + ":" + connectionSocket.getPort());
             (new PlayerThread(connectionSocket)).start();
         }
     }

@@ -14,50 +14,43 @@ public class Game {
     private static List<DataOutputStream> outputStreams = new ArrayList<>();
 
 
-    synchronized public static void addThread(PlayerThread playerThread, String name) throws IOException {
+    synchronized public static void addThread(PlayerThread playerThread, String name) {
         Location p = getRandomFreePosition();
         Player player = new Player(name, p, "up");
         players.add(player);
         playerThread.setPlayer(player);
         outputStreams.add(playerThread.getOutputStream());
-        sendToAllClients();
+        updateClients();
     }
 
+    // TODO: implement removeThread
+    // ide: altid send en liste af logged out players så de kan fjernes fra guien, hvis listen ikke er tom
 
     synchronized public static void movePlayer(Player player, String direction) {
-        // If player direction changed, send update to all clients
-        boolean sendToClient = !player.getDirection().equals(direction);
-
-        // Update player direction
+        boolean shouldUpdateClients = !player.getDirection().equals(direction);
         player.setDirection(direction);
 
         int x = player.getXpos(), y = player.getYpos();
         int delta_x = 0, delta_y = 0;
 
-        if (direction.equals("up")) {
-            delta_y = -1;
-        } else if (direction.equals("down")) {
-            delta_y = 1;
-        } else if (direction.equals("left")) {
-            delta_x = -1;
-        } else if (direction.equals("right")) {
-            delta_x = 1;
+        switch (direction) {
+            case "up" -> delta_y = -1;
+            case "down" -> delta_y = 1;
+            case "left" -> delta_x = -1;
+            case "right" -> delta_x = 1;
         }
 
-        if (!(GameConstants.board[y + delta_y].charAt(x + delta_x) == 'w')
-                && getPlayerAt(x + delta_x, y + delta_y) == null) {
+        boolean isWall = GameConstants.board[y + delta_y].charAt(x + delta_x) == 'w';
+        boolean isPlayer = getPlayerAt(x + delta_x, y + delta_y) != null;
+        if (!isWall && !isPlayer) {
             Location newpos = new Location(x + delta_x, y + delta_y);
             player.setCurrentLocation(newpos);
-            sendToClient = true; // Player moved, send update to all clients
+            shouldUpdateClients = true;
         }
 
         // If player moved or changed direction, send update to all clients
-        if (sendToClient) {
-            try {
-                sendToAllClients();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        if (shouldUpdateClients) {
+            updateClients();
         }
     }
 
@@ -95,14 +88,16 @@ public class Game {
         return null;
     }
 
-    private static void sendToAllClients() throws IOException {
-        DataTransferObject dataTransferObject = new DataTransferObject(players);
-        JSONObject jsonObject = new JSONObject(dataTransferObject);
-        System.out.println(jsonObject);
-        for (DataOutputStream outputStream: outputStreams){
-            outputStream.writeBytes(jsonObject + "\n");
+    private static void updateClients() {
+        try {
+            DataTransferObject dataTransferObject = new DataTransferObject(players);
+            JSONObject jsonObject = new JSONObject(dataTransferObject);
+            System.out.println(jsonObject);
+            for (DataOutputStream outputStream: outputStreams){
+                outputStream.writeBytes(jsonObject + "\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
-
-
 }
