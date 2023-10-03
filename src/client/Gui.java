@@ -83,7 +83,11 @@ public class Gui extends Application {
             Location lastLoc = new Location(jsonLastLoc.getInt("x"), jsonLastLoc.getInt("y"));
 
             // Flyt spilleren på skærmen
-            movePlayerOnScreen(lastLoc, currLoc, direction);
+            if (currLoc.equals(lastLoc)) {
+                placePlayerOnScreen(currLoc, direction);
+            } else {
+                movePlayerOnScreen(lastLoc, currLoc, direction);
+            }
         }
     }
 
