@@ -51,7 +51,7 @@ public class CommunicationThread extends Thread {
         try {
             Thread.sleep(1000);
 
-            clientSocket = new Socket("localhost", 6789);
+            clientSocket = new Socket(ip, 6789);
             BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             outToServer = new DataOutputStream(clientSocket.getOutputStream());
             outToServer.writeBytes("login " + name + '\n');
