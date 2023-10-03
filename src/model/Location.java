@@ -20,6 +20,15 @@ public class Location {
 	public void setY(int y) {
 		this.y = y;
 	}
-	
 
+	@Override
+	public boolean equals(Object obj) {
+		Location other = (Location) obj;
+		return this.x == other.x && this.y == other.y;
+	}
+
+	@Override
+	public String toString() {
+		return "Location [x=" + x + ", y=" + y + "]";
+	}
 }
