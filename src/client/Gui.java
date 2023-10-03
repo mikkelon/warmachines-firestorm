@@ -162,27 +162,18 @@ public class Gui extends Application {
             primaryStage.setScene(scene);
             primaryStage.show();
 
-            scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
-                switch (event.getCode()) {
-                    case UP:
-                        CommunicationThread.writeToServer("move up");
-                        break;
-                    case DOWN:
-                        CommunicationThread.writeToServer("move down");
-                        break;
-                    case LEFT:
-                        CommunicationThread.writeToServer("move left");
-                        break;
-                    case RIGHT:
-                        CommunicationThread.writeToServer("move right");
-                        break;
-                    case ESCAPE:
-                        System.exit(0);
-                    default:
-                        break;
-                }
-            });
-
+			scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+				switch (event.getCode()) {
+				case UP:    CommunicationThread.writeToServer("move up");    break;
+				case DOWN:  CommunicationThread.writeToServer("move down");  break;
+				case LEFT:  CommunicationThread.writeToServer("move left");  break;
+				case RIGHT: CommunicationThread.writeToServer("move right"); break;
+				case SPACE: CommunicationThread.writeToServer("fire");      break;
+				case ESCAPE:System.exit(0);
+				default: break;
+				}
+			});
+			
             // Putting default players on screen
 //			for (int i=0;i<GameLogic.players.size();i++) {
 //			  fields[GameLogic.players.get(i).getXpos()][GameLogic.players.get(i).getYpos()].setGraphic(new ImageView(hero_up));

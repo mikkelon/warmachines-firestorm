@@ -3,6 +3,7 @@ package server;
 import model.GameConstants;
 import model.Location;
 import model.Player;
+import model.Shell;
 import org.json.JSONObject;
 
 import java.io.DataOutputStream;
@@ -11,6 +12,7 @@ import java.util.*;
 
 public class Game {
     private static List<Player> players = new ArrayList<>();
+    private static List<Shell> shells = new ArrayList<>();
     private static List<DataOutputStream> outputStreams = new ArrayList<>();
     private static Player loggedOutPlayer = null;
 
@@ -93,7 +95,6 @@ public class Game {
         }
     }
 
-
     public static Location getRandomFreePosition()
     // finds a random new position which is not wall
     // and not occupied by other players
@@ -127,12 +128,55 @@ public class Game {
         return null;
     }
 
+    public static void fire(Player player) {
+        Location location = player.getCurrentLocation();
+        String direction = player.getDirection();
+        Shell shell = new Shell(location, direction);
+        shells.add(shell);
+
+    }
+
+    public static List<Shell> getShells() {
+        return shells;
+    }
+
+    public static void moveShell(Shell shell) {
+        int x = shell.getXpos(), y = shell.getYpos();
+        int delta_x = 0, delta_y = 0;
+
+        switch (shell.getDirection()) {
+            case "up" -> delta_y = -1;
+            case "down" -> delta_y = 1;
+            case "left" -> delta_x = -1;
+            case "right" -> delta_x = 1;
+        }
+
+        boolean isWall = GameConstants.board[y + delta_y].charAt(x + delta_x) == 'w';
+        boolean isPlayer = getPlayerAt(x + delta_x, y + delta_y) != null;
+
+        if (isPlayer) {
+            // TODO: remove shell, transfer points
+            shells.remove(shell);
+
+
+        } else if (isWall) {
+            // TODO: remove shell
+            shells.remove(shell);
+
+
+        } else {
+            Location newpos = new Location(x + delta_x, y + delta_y);
+            shell.setCurrentLocation(newpos);
+        }
+        updateClients();
+    }
+
     private static void updateClients() {
         try {
-            DataTransferObject dataTransferObject = new DataTransferObject(players, loggedOutPlayer);
+            DataTransferObject dataTransferObject = new DataTransferObject(players, loggedOutPlayer, shells);
             JSONObject jsonObject = new JSONObject(dataTransferObject);
             System.out.println(jsonObject);
-            for (DataOutputStream outputStream: outputStreams){
+            for (DataOutputStream outputStream : outputStreams) {
                 outputStream.writeBytes(jsonObject + "\n");
             }
             loggedOutPlayer = null;

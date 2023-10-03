@@ -14,11 +14,13 @@ import java.net.SocketException;
 public class CommunicationThread extends Thread {
 
     private static DataOutputStream outToServer;
+    private final String ip;
     private String name;
     private static Socket clientSocket;
 
-    public CommunicationThread(String name) {
+    public CommunicationThread(String name, String ip) {
         this.name = name;
+        this.ip = ip;
     }
 
     public static void writeToServer(String command) {
