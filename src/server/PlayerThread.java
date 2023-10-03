@@ -6,6 +6,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class PlayerThread extends Thread {
     private final Socket connenctionSocket;
@@ -35,9 +36,16 @@ public class PlayerThread extends Thread {
                     if (command.startsWith("move ")) {
                         String direction = command.substring(5);
                         Game.movePlayer(player, direction);
+                    } else if (command.equalsIgnoreCase("logout")) {
+                        throw new SocketException(player.getName() + " logged out");
+                    } else {
+                        System.out.println("Unknown command: " + command);
                     }
                 }
             }
+        } catch (SocketException e) {
+            System.out.println(player.getName() + " disconnected");
+            Game.removePlayer(player, outToClient);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

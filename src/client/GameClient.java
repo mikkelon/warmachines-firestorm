@@ -16,5 +16,7 @@ public class GameClient {
 
         new CommunicationThread(navn).start();
         Application.launch(Gui.class);
+
+        CommunicationThread.disconnect();
     }
 }

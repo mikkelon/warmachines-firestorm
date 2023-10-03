@@ -12,19 +12,53 @@ import java.util.*;
 public class Game {
     private static List<Player> players = new ArrayList<>();
     private static List<DataOutputStream> outputStreams = new ArrayList<>();
+    private static Player loggedOutPlayer = null;
 
 
     synchronized public static void addThread(PlayerThread playerThread, String name) {
         Location p = getRandomFreePosition();
-        Player player = new Player(name, p, "up");
+        Player player = new Player(checkNameAvailability(name), p, "up");
         players.add(player);
         playerThread.setPlayer(player);
         outputStreams.add(playerThread.getOutputStream());
         updateClients();
     }
 
-    // TODO: implement removeThread
-    // ide: altid send en liste af logged out players så de kan fjernes fra guien, hvis listen ikke er tom
+    /**
+     * Tjekker om navnet er ledigt. Hvis ikke navnet er ledigt, vælges en tilfældig kombination af to ord.
+     * Metoden kalder sig selv rekursivt, så den også tjekker om det nye navn er ledigt.
+     * Der er 132 kombinationer af to ord, så der er en god chance for at finde et ledigt navn.
+     * @param name Navnet der skal tjekkes
+     * @return Navnet hvis det er ledigt, ellers et nyt navn
+     */
+    private static String checkNameAvailability(String name) {
+        String[] words = {
+                "Cactus", "Pickle", "Dragon", "Unicorn", "Ninja", "Pirate", "Robot", "Wizard", "Samurai", "Vampire", "Ghost", "Zombie"
+        };
+
+        // Led efter en spiller med samme navn
+        for (Player p : players) {
+            // Hvis der er en spiller med samme navn, så prøv med et nyt navn
+            if (p.getName().equals(name)) {
+                // Kald rekursivt med et nyt navn
+                return checkNameAvailability(words[new Random().nextInt(words.length)] + words[new Random().nextInt(words.length)]);
+            }
+        }
+        // Hvis der ikke er en spiller med samme navn, så returner navnet
+        return name;
+    }
+
+    /**
+     * Fjerner en spiller fra spillet. Fjerner Player og OutputStream fra deres respektive lister.
+     * @param player Spilleren der skal fjernes
+     * @param outputStream DataOutputStream der skal fjernes
+     */
+    synchronized public static void removePlayer(Player player, DataOutputStream outputStream) {
+        players.remove(player);
+        outputStreams.remove(outputStream);
+        loggedOutPlayer = player;
+        updateClients();
+    }
 
     synchronized public static void movePlayer(Player player, String direction) {
         boolean shouldUpdateClients = !player.getDirection().equals(direction);
@@ -90,12 +124,13 @@ public class Game {
 
     private static void updateClients() {
         try {
-            DataTransferObject dataTransferObject = new DataTransferObject(players);
+            DataTransferObject dataTransferObject = new DataTransferObject(players, loggedOutPlayer);
             JSONObject jsonObject = new JSONObject(dataTransferObject);
             System.out.println(jsonObject);
             for (DataOutputStream outputStream: outputStreams){
                 outputStream.writeBytes(jsonObject + "\n");
             }
+            loggedOutPlayer = null;
         } catch (IOException e) {
             e.printStackTrace();
         }

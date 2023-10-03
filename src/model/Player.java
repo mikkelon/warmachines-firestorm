@@ -15,6 +15,14 @@ public class Player {
 		this.point = 0;
 	};
 
+	public Player(String name, Location loc, Location lastLoc, String direction) {
+		this.name = name;
+		this.currentLocation = loc;
+		this.lastLocation = lastLoc;
+		this.direction = direction;
+		this.point = 0;
+	};
+
 	public String getName() {
 		return name;
 	}
@@ -55,5 +63,14 @@ public class Player {
 	}
 	public String toString() {
 		return name+":   "+point;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof Player) {
+			Player p = (Player) obj;
+			return p.getName().equals(this.getName());
+		}
+		return false;
 	}
 }
