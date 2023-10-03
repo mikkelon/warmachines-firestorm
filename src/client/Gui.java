@@ -90,6 +90,7 @@ public class Gui extends Application {
 				case DOWN:  CommunicationThread.writeToServer("move down");  break;
 				case LEFT:  CommunicationThread.writeToServer("move left");  break;
 				case RIGHT: CommunicationThread.writeToServer("move right"); break;
+				case SPACE: CommunicationThread.writeToServer("shoot");      break;
 				case ESCAPE:System.exit(0);
 				default: break;
 				}
