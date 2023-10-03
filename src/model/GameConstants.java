@@ -24,6 +24,5 @@ public class GameConstants {
 			"wwwwwwwwwwwwwwwwwwww"
 	};
 
-	
-
+	// TODO: make constans for directions
 }

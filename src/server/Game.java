@@ -3,6 +3,7 @@ package server;
 import model.GameConstants;
 import model.Location;
 import model.Player;
+import model.Shell;
 import org.json.JSONObject;
 
 import java.io.DataOutputStream;
@@ -11,20 +12,60 @@ import java.util.*;
 
 public class Game {
     private static List<Player> players = new ArrayList<>();
+    private static List<Shell> shells = new ArrayList<>();
     private static List<DataOutputStream> outputStreams = new ArrayList<>();
+    private static Player loggedOutPlayer = null;
 
 
     synchronized public static void addThread(PlayerThread playerThread, String name) {
         Location p = getRandomFreePosition();
-        Player player = new Player(name, p, "up");
+        Player player = new Player(checkNameAvailability(name), p, "up");
         players.add(player);
         playerThread.setPlayer(player);
         outputStreams.add(playerThread.getOutputStream());
         updateClients();
     }
 
-    // TODO: implement removeThread
-    // ide: altid send en liste af logged out players så de kan fjernes fra guien, hvis listen ikke er tom
+    /**
+     * Tjekker om navnet er ledigt. Hvis ikke navnet er ledigt, vælges en tilfældig kombination af to ord.
+     * Metoden kalder sig selv rekursivt, så den også tjekker om det nye navn er ledigt.
+     * Der er 132 kombinationer af to ord, så der er en god chance for at finde et ledigt navn.
+     * @param name Navnet der skal tjekkes
+     * @return Navnet hvis det er ledigt, ellers et nyt navn
+     */
+    private static String checkNameAvailability(String name) {
+        String[] words = {
+                "Cactus", "Pickle", "Dragon", "Unicorn", "Ninja", "Pirate", "Robot", "Wizard", "Samurai", "Vampire", "Ghost", "Zombie"
+        };
+
+        // Hvis navnet er tomt, så prøv med et nyt navn
+        if (name.equals("")) {
+            return checkNameAvailability(words[new Random().nextInt(words.length)] + words[new Random().nextInt(words.length)]);
+        }
+
+        // Led efter en spiller med samme navn
+        for (Player p : players) {
+            // Hvis der er en spiller med samme navn, så prøv med et nyt navn
+            if (p.getName().equals(name)) {
+                // Kald rekursivt med et nyt navn
+                return checkNameAvailability(words[new Random().nextInt(words.length)] + words[new Random().nextInt(words.length)]);
+            }
+        }
+        // Hvis der ikke er en spiller med samme navn, så returner navnet
+        return name;
+    }
+
+    /**
+     * Fjerner en spiller fra spillet. Fjerner Player og OutputStream fra deres respektive lister.
+     * @param player Spilleren der skal fjernes
+     * @param outputStream DataOutputStream der skal fjernes
+     */
+    synchronized public static void removePlayer(Player player, DataOutputStream outputStream) {
+        players.remove(player);
+        outputStreams.remove(outputStream);
+        loggedOutPlayer = player;
+        updateClients();
+    }
 
     synchronized public static void movePlayer(Player player, String direction) {
         boolean shouldUpdateClients = !player.getDirection().equals(direction);
@@ -53,7 +94,6 @@ public class Game {
             updateClients();
         }
     }
-
 
     public static Location getRandomFreePosition()
     // finds a random new position which is not wall
@@ -88,14 +128,58 @@ public class Game {
         return null;
     }
 
+    public static void fire(Player player) {
+        Location location = player.getCurrentLocation();
+        String direction = player.getDirection();
+        Shell shell = new Shell(location, direction);
+        shells.add(shell);
+
+    }
+
+    public static List<Shell> getShells() {
+        return shells;
+    }
+
+    public static void moveShell(Shell shell) {
+        int x = shell.getXpos(), y = shell.getYpos();
+        int delta_x = 0, delta_y = 0;
+
+        switch (shell.getDirection()) {
+            case "up" -> delta_y = -1;
+            case "down" -> delta_y = 1;
+            case "left" -> delta_x = -1;
+            case "right" -> delta_x = 1;
+        }
+
+        boolean isWall = GameConstants.board[y + delta_y].charAt(x + delta_x) == 'w';
+        boolean isPlayer = getPlayerAt(x + delta_x, y + delta_y) != null;
+
+        if (isPlayer) {
+            // TODO: remove shell, transfer points
+            shells.remove(shell);
+
+
+        } else if (isWall) {
+            // TODO: remove shell
+            shells.remove(shell);
+
+
+        } else {
+            Location newpos = new Location(x + delta_x, y + delta_y);
+            shell.setCurrentLocation(newpos);
+        }
+        updateClients();
+    }
+
     private static void updateClients() {
         try {
-            DataTransferObject dataTransferObject = new DataTransferObject(players);
+            DataTransferObject dataTransferObject = new DataTransferObject(players, loggedOutPlayer, shells);
             JSONObject jsonObject = new JSONObject(dataTransferObject);
             System.out.println(jsonObject);
-            for (DataOutputStream outputStream: outputStreams){
+            for (DataOutputStream outputStream : outputStreams) {
                 outputStream.writeBytes(jsonObject + "\n");
             }
+            loggedOutPlayer = null;
         } catch (IOException e) {
             e.printStackTrace();
         }

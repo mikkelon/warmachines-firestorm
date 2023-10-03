@@ -6,6 +6,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class PlayerThread extends Thread {
     private final Socket connenctionSocket;
@@ -29,15 +30,28 @@ public class PlayerThread extends Thread {
                 String name = login.substring(6);
                 Game.addThread(this, name);
                 this.setName("Thread-" + player.getName());
-                while(true) {
+                while (true) {
                     String command = inFromClient.readLine();
                     System.out.println(command);
-                    if (command.startsWith("move ")) {
-                        String direction = command.substring(5);
-                        Game.movePlayer(player, direction);
+                    if (command != null) {
+                        if (command.startsWith("move ")) {
+                            String direction = command.substring(5);
+                            Game.movePlayer(player, direction);
+                        } else if (command.equals("fire")) {
+                            System.out.println("SHOTS FIRED");
+                            Game.fire(player);
+                        } else {
+                            System.out.println("Unknown command " + command + " from " + player.getName());
+                        }
+                    } else {
+                        System.out.println("Command is null, probably lost connection to " + player.getName());
+                        throw new SocketException("Lost connection to " + player.getName());
                     }
                 }
             }
+        } catch (SocketException e) {
+            System.out.println(player.getName() + " disconnected");
+            Game.removePlayer(player, outToClient);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
