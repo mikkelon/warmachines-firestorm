@@ -1,6 +1,7 @@
 package server;
 
 import model.Player;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -30,16 +31,19 @@ public class PlayerThread extends Thread {
                 String name = login.substring(6);
                 Game.addThread(this, name);
                 this.setName("Thread-" + player.getName());
-                while(true) {
+                while (true) {
                     String command = inFromClient.readLine();
                     System.out.println(command);
-                    if (command.startsWith("move ")) {
-                        String direction = command.substring(5);
-                        Game.movePlayer(player, direction);
-                    } else if (command.equalsIgnoreCase("logout")) {
-                        throw new SocketException(player.getName() + " logged out");
+                    if (command != null) {
+                        if (command.startsWith("move ")) {
+                            String direction = command.substring(5);
+                            Game.movePlayer(player, direction);
+                        } else {
+                            System.out.println("Unknown command " + command + " from " + player.getName());
+                        }
                     } else {
-                        System.out.println("Unknown command: " + command);
+                        System.out.println("Command is null, probably lost connection to " + player.getName());
+                        throw new SocketException("Lost connection to " + player.getName());
                     }
                 }
             }

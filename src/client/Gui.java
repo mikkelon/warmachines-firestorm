@@ -37,7 +37,6 @@ public class Gui extends Application {
 
     private static Label[][] fields;
     private static GridPane boardGrid;
-    private static Set<Player> playerCache = new HashSet<>();
     private TextArea scoreList;
 
 
@@ -82,11 +81,6 @@ public class Gui extends Application {
             JSONObject jsonLastLoc = jsonPlayer.getJSONObject("lastLocation");
             Location currLoc = new Location(jsonCurrLoc.getInt("x"), jsonCurrLoc.getInt("y"));
             Location lastLoc = new Location(jsonLastLoc.getInt("x"), jsonLastLoc.getInt("y"));
-            String name = jsonPlayer.getString("name");
-
-            // Opret et nyt Player objekt til klientens spiller cache
-            Player p = new Player(name, currLoc, lastLoc, direction);
-            playerCache.add(p);
 
             // Flyt spilleren på skærmen
             movePlayerOnScreen(lastLoc, currLoc, direction);

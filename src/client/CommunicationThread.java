@@ -15,6 +15,7 @@ public class CommunicationThread extends Thread {
 
     private static DataOutputStream outToServer;
     private String name;
+    private static Socket clientSocket;
 
     public CommunicationThread(String name) {
         this.name = name;
@@ -24,16 +25,22 @@ public class CommunicationThread extends Thread {
         if (outToServer != null) {
             try {
                 outToServer.writeBytes(command + "\n"); // TODO: command needs to have a name
+            } catch (SocketException e) {
+                System.out.println("No connection to server");
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
         }
     }
 
-    public static void disconnect() {
+    public static void disconnect(){
         if (outToServer != null) {
-            writeToServer("logout");
-            outToServer = null;
+            try {
+                outToServer.close();
+                clientSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -42,7 +49,7 @@ public class CommunicationThread extends Thread {
         try {
             Thread.sleep(1000);
 
-            Socket clientSocket = new Socket("localhost", 6789);
+            clientSocket = new Socket("localhost", 6789);
             BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             outToServer = new DataOutputStream(clientSocket.getOutputStream());
             outToServer.writeBytes("login " + name + '\n');
@@ -55,16 +62,13 @@ public class CommunicationThread extends Thread {
                 try {
                     loggedOutPlayer = json.getJSONObject("loggedOutPlayer");
                 } catch (JSONException e) {
-                    System.out.println("Ingen loggedOutPlayer");
+//                    System.out.println("Ingen loggedOutPlayer");
                 }
-                System.out.println(loggedOutPlayer);
                 Gui.updateGame(players, loggedOutPlayer);
             }
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         } catch (SocketException e) {
             System.out.println("Connection to server lost");
-        } catch (IOException e) {
+        } catch (InterruptedException | IOException e) {
             throw new RuntimeException(e);
         }
     }

@@ -36,6 +36,11 @@ public class Game {
                 "Cactus", "Pickle", "Dragon", "Unicorn", "Ninja", "Pirate", "Robot", "Wizard", "Samurai", "Vampire", "Ghost", "Zombie"
         };
 
+        // Hvis navnet er tomt, så prøv med et nyt navn
+        if (name.equals("")) {
+            return checkNameAvailability(words[new Random().nextInt(words.length)] + words[new Random().nextInt(words.length)]);
+        }
+
         // Led efter en spiller med samme navn
         for (Player p : players) {
             // Hvis der er en spiller med samme navn, så prøv med et nyt navn
