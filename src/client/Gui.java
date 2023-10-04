@@ -98,7 +98,6 @@ public class Gui extends Application {
         Map<Integer, Shell> cachedShells = Cache.getShells();
         for (Shell s : shells.values()) {
             if (!cachedShells.containsKey(s.getId())) {
-                System.out.println("Shell added");
                 // Add new shell
                 Cache.updateShell(s);
                 placeShellOnScreen(s.getLocation());
@@ -107,7 +106,6 @@ public class Gui extends Application {
         for (Shell cachedShell : cachedShells.values()) {
             Shell shell = shells.get(cachedShell.getId());
             if (shell == null) {
-                System.out.println("Shell removed");
                 // Remove shell
                 Cache.removeShell(cachedShell.getId());
                 removeGameObjectFromScreen(cachedShell.getLocation());

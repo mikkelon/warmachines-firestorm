@@ -135,12 +135,21 @@ public class Game {
     }
 
     public static void fire(Player player) {
-        Location location = player.getLocation();
-        String direction = player.getDirection();
-        Shell shell = new Shell(shellId, location, direction);
+        String direction = player.getDirection();/*
+
+        int x = player.getXpos(), y = player.getYpos();
+        int delta_x = 0, delta_y = 0;
+
+        switch (direction) {
+            case "up" -> delta_y = -1;
+            case "down" -> delta_y = 1;
+            case "left" -> delta_x = -1;
+            case "right" -> delta_x = 1;
+        }*/
+
+        Shell shell = new Shell(shellId, player.getLocation(), direction);
         shells.add(shell);
         Game.shellId++;
-        System.out.println(shellId);
     }
 
     public static List<Shell> getShells() {
@@ -164,13 +173,8 @@ public class Game {
         if (isPlayer) {
             // TODO: remove shell, transfer points
             shells.remove(shell);
-
-
         } else if (isWall) {
-            // TODO: remove shell
             shells.remove(shell);
-
-
         } else {
             Location newpos = new Location(x + delta_x, y + delta_y);
             shell.setLocation(newpos);
