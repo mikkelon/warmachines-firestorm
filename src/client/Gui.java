@@ -35,7 +35,7 @@ public class Gui extends Application {
 
     private static Label[][] fields;
     private static GridPane boardGrid;
-    private TextArea scoreList;
+    private static TextArea scoreList;
 
 
     // -------------------------------------------
@@ -67,6 +67,7 @@ public class Gui extends Application {
     public static void updateGame(Map<String, Player> players, Map<Integer, Shell> shells) {
         updatePlayers(players);
         updateShells(shells);
+        updateScoreTable();
     }
 
     public static void updatePlayers(Map<String, Player> players) {
@@ -220,36 +221,24 @@ public class Gui extends Application {
                 }
             });
 
-            // Putting default players on screen
-//			for (int i=0;i<GameLogic.players.size();i++) {
-//			  fields[GameLogic.players.get(i).getXpos()][GameLogic.players.get(i).getYpos()].setGraphic(new ImageView(hero_up));
-//			}
             scoreList.setText(getScoreList());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void updateScoreTable() {
+    public static void updateScoreTable() {
         Platform.runLater(() -> {
             scoreList.setText(getScoreList());
         });
     }
 
-    public void playerMoved(int delta_x, int delta_y, String direction) {
-//		GameLogic.updatePlayer(delta_x,delta_y,direction);
-//		updateScoreTable();
+    public static String getScoreList() {
+		StringBuffer b = new StringBuffer(100);
+		for (Player p : Cache.getPlayers().values()) {
+			b.append(p+"\r\n");
+		}
+		return b.toString();
     }
-
-    public String getScoreList() {
-//		StringBuffer b = new StringBuffer(100);
-//		for (Player p : GameLogic.players) {
-//			b.append(p+"\r\n");
-//		}
-//		return b.toString();
-        return null;
-    }
-
-
 }
 
