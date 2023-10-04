@@ -1,8 +1,11 @@
 package client;
 
+import model.Location;
+import model.Player;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import server.DataTransferObject;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -10,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.*;
 
 public class CommunicationThread extends Thread {
 
@@ -26,7 +30,7 @@ public class CommunicationThread extends Thread {
     public static void writeToServer(String command) {
         if (outToServer != null) {
             try {
-                outToServer.writeBytes(command + "\n"); // TODO: command needs to have a name
+                outToServer.writeBytes(command + "\n");
             } catch (SocketException e) {
                 System.out.println("No connection to server");
             } catch (IOException e) {
@@ -46,10 +50,28 @@ public class CommunicationThread extends Thread {
         }
     }
 
+    public static Map<String, Player> parsePlayers(String json) {
+        Map<String, Player> players = new HashMap<>();
+        JSONObject jsonObject = new JSONObject(json);
+        JSONArray jsonPlayers = jsonObject.getJSONArray("players");
+
+        for (int i = 0; i < jsonPlayers.length(); i++) {
+            JSONObject jsonPlayer = jsonPlayers.getJSONObject(i);
+            String name = jsonPlayer.getString("name");
+            JSONObject currentLocation = jsonPlayer.getJSONObject("currentLocation");
+            int x = currentLocation.getInt("x");
+            int y = currentLocation.getInt("y");
+            String direction = jsonPlayer.getString("direction");
+            players.put(name, new Player(name, new Location(x, y), direction));
+        }
+
+        return players;
+    }
+
     @Override
     public void run() {
         try {
-            Thread.sleep(1000);
+            Thread.sleep(3000);
 
             clientSocket = new Socket(ip, 6789);
             BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -58,15 +80,8 @@ public class CommunicationThread extends Thread {
             while (outToServer != null) {
                 String updateFromServer = inFromServer.readLine();
                 System.out.println(updateFromServer);
-                JSONObject json = new JSONObject(updateFromServer);
-                JSONArray players = json.getJSONArray("players");
-                JSONObject loggedOutPlayer = null;
-                try {
-                    loggedOutPlayer = json.getJSONObject("loggedOutPlayer");
-                } catch (JSONException e) {
-//                    System.out.println("Ingen loggedOutPlayer");
-                }
-                Gui.updateGame(players, loggedOutPlayer);
+                Map<String, Player> players = parsePlayers(updateFromServer);
+                Gui.updateGame(players);
             }
         } catch (SocketException e) {
             System.out.println("Connection to server lost");

@@ -20,9 +20,7 @@ import model.Player;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class Gui extends Application {
 
@@ -66,24 +64,28 @@ public class Gui extends Application {
         }
     }
 
-    public static void updateGame(JSONArray players, JSONObject loggedOutPlayer) {
-        if (loggedOutPlayer != null) {
-            Location playerLocation = new Location(loggedOutPlayer.getJSONObject("currentLocation").getInt("x"),
-                    loggedOutPlayer.getJSONObject("currentLocation").getInt("y"));
-            removePlayerOnScreen(playerLocation);
+    public static void updateGame(Map<String, Player> players) {
+        Map<String, Player> cachedPlayers = Cache.getPlayers();
+        for (Player p : players.values()) {
+            if (!cachedPlayers.containsKey(p.getName())) {
+                // Add new player
+                Cache.addPlayer(p);
+                placePlayerOnScreen(p.getCurrentLocation(), p.getDirection());
+            }
         }
-
-        for (int i = 0; i < players.length(); i++) {
-            JSONObject jsonPlayer = players.getJSONObject(i); //
-
-            String direction = jsonPlayer.getString("direction");
-            JSONObject jsonCurrLoc = jsonPlayer.getJSONObject("currentLocation");
-            JSONObject jsonLastLoc = jsonPlayer.getJSONObject("lastLocation");
-            Location currLoc = new Location(jsonCurrLoc.getInt("x"), jsonCurrLoc.getInt("y"));
-            Location lastLoc = new Location(jsonLastLoc.getInt("x"), jsonLastLoc.getInt("y"));
-
-            // Flyt spilleren på skærmen
-            movePlayerOnScreen(lastLoc, currLoc, direction);
+        for (Player cachedPlayer : cachedPlayers.values()) {
+            Player player = players.get(cachedPlayer.getName());
+            if (player == null) {
+                // Remove player
+                Cache.removePlayer(cachedPlayer.getName());
+                removePlayerOnScreen(cachedPlayer.getCurrentLocation());
+            } else if (!player.getCurrentLocation().equals(cachedPlayer.getCurrentLocation())) {
+                // Move player
+                Location newPlayerLocation = player.getCurrentLocation();
+                String direction = player.getDirection();
+                movePlayerOnScreen(cachedPlayer.getCurrentLocation(), newPlayerLocation, direction);
+                Cache.updatePlayer(player);
+            }
         }
     }
 
@@ -162,18 +164,18 @@ public class Gui extends Application {
             primaryStage.setScene(scene);
             primaryStage.show();
 
-			scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
-				switch (event.getCode()) {
-				case UP:    CommunicationThread.writeToServer("move up");    break;
-				case DOWN:  CommunicationThread.writeToServer("move down");  break;
-				case LEFT:  CommunicationThread.writeToServer("move left");  break;
-				case RIGHT: CommunicationThread.writeToServer("move right"); break;
-				case SPACE: CommunicationThread.writeToServer("fire");      break;
-				case ESCAPE:System.exit(0);
-				default: break;
-				}
-			});
-			
+            scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+                switch (event.getCode()) {
+                    case UP:    CommunicationThread.writeToServer("move up");    break;
+                    case DOWN:  CommunicationThread.writeToServer("move down");  break;
+                    case LEFT:  CommunicationThread.writeToServer("move left");  break;
+                    case RIGHT: CommunicationThread.writeToServer("move right"); break;
+                    case SPACE: CommunicationThread.writeToServer("fire");      break;
+                    case ESCAPE:System.exit(0);
+                    default: break;
+                }
+            });
+
             // Putting default players on screen
 //			for (int i=0;i<GameLogic.players.size();i++) {
 //			  fields[GameLogic.players.get(i).getXpos()][GameLogic.players.get(i).getYpos()].setGraphic(new ImageView(hero_up));
