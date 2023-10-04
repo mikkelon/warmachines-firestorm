@@ -15,7 +15,6 @@ public class Game {
     private static List<Shell> shells = new ArrayList<>();
     private static List<DataOutputStream> outputStreams = new ArrayList<>();
     private static Set<String> takenNames = new HashSet<>();
-    private static Player loggedOutPlayer = null;
     private static int shellId = 0;
 
 
@@ -71,7 +70,6 @@ public class Game {
     synchronized public static void removePlayer(Player player, DataOutputStream outputStream) {
         players.remove(player);
         outputStreams.remove(outputStream);
-        loggedOutPlayer = player;
         updateClients();
     }
 
@@ -93,7 +91,7 @@ public class Game {
         boolean isPlayer = getPlayerAt(x + delta_x, y + delta_y) != null;
         if (!isWall && !isPlayer) {
             Location newpos = new Location(x + delta_x, y + delta_y);
-            player.setCurrentLocation(newpos);
+            player.setLocation(newpos);
             shouldUpdateClients = true;
         }
 
@@ -137,11 +135,12 @@ public class Game {
     }
 
     public static void fire(Player player) {
-        Location location = player.getCurrentLocation();
+        Location location = player.getLocation();
         String direction = player.getDirection();
-        Shell shell = new Shell(shellId++, location, direction);
+        Shell shell = new Shell(shellId, location, direction);
         shells.add(shell);
-
+        Game.shellId++;
+        System.out.println(shellId);
     }
 
     public static List<Shell> getShells() {
@@ -174,20 +173,19 @@ public class Game {
 
         } else {
             Location newpos = new Location(x + delta_x, y + delta_y);
-            shell.setCurrentLocation(newpos);
+            shell.setLocation(newpos);
         }
         updateClients();
     }
 
     private static void updateClients() {
         try {
-            DataTransferObject dataTransferObject = new DataTransferObject(players, loggedOutPlayer, shells);
+            DataTransferObject dataTransferObject = new DataTransferObject(players, shells);
             JSONObject jsonObject = new JSONObject(dataTransferObject);
             System.out.println(jsonObject);
             for (DataOutputStream outputStream : outputStreams) {
                 outputStream.writeBytes(jsonObject + "\n");
             }
-            loggedOutPlayer = null;
         } catch (IOException e) {
             e.printStackTrace();
         }

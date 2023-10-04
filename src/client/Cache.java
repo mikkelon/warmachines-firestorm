@@ -20,7 +20,7 @@ public class Cache {
     }
 
     public static Map<String, Player> getPlayers() {
-        return players;
+        return new HashMap<>(players);
     }
 
     public static void removeShell(int id) {
@@ -32,6 +32,6 @@ public class Cache {
     }
 
     public static Map<Integer, Shell> getShells() {
-        return shells;
+        return new HashMap<>(shells);
     }
 }

@@ -59,9 +59,9 @@ public class CommunicationThread extends Thread {
         for (int i = 0; i < jsonPlayers.length(); i++) {
             JSONObject jsonPlayer = jsonPlayers.getJSONObject(i);
             String name = jsonPlayer.getString("name");
-            JSONObject currentLocation = jsonPlayer.getJSONObject("currentLocation");
-            int x = currentLocation.getInt("x");
-            int y = currentLocation.getInt("y");
+            JSONObject location = jsonPlayer.getJSONObject("location");
+            int x = location.getInt("x");
+            int y = location.getInt("y");
             String direction = jsonPlayer.getString("direction");
             players.put(name, new Player(name, new Location(x, y), direction));
         }
@@ -77,9 +77,9 @@ public class CommunicationThread extends Thread {
         for (int i = 0; i < jsonShells.length(); i++) {
             JSONObject jsonShell = jsonShells.getJSONObject(i);
             int id = jsonShell.getInt("id");
-            JSONObject currentLocation = jsonShell.getJSONObject("currentLocation");
-            int x = currentLocation.getInt("x");
-            int y = currentLocation.getInt("y");
+            JSONObject location = jsonShell.getJSONObject("location");
+            int x = location.getInt("x");
+            int y = location.getInt("y");
             String direction = jsonShell.getString("direction");
             shells.put(id, new Shell(id, new Location(x, y), direction));
         }

@@ -75,7 +75,7 @@ public class Gui extends Application {
             if (!cachedPlayers.containsKey(p.getName())) {
                 // Add new player
                 Cache.updatePlayer(p);
-                placePlayerOnScreen(p.getCurrentLocation(), p.getDirection());
+                placePlayerOnScreen(p.getLocation(), p.getDirection());
             }
         }
         for (Player cachedPlayer : cachedPlayers.values()) {
@@ -83,12 +83,12 @@ public class Gui extends Application {
             if (player == null) {
                 // Remove player
                 Cache.removePlayer(cachedPlayer.getName());
-                removeGameObjectFromScreen(cachedPlayer.getCurrentLocation());
-            } else if (!player.getCurrentLocation().equals(cachedPlayer.getCurrentLocation())) {
+                removeGameObjectFromScreen(cachedPlayer.getLocation());
+            } else if (!player.getLocation().equals(cachedPlayer.getLocation())) {
                 // Move player
-                Location newPlayerLocation = player.getCurrentLocation();
+                Location newPlayerLocation = player.getLocation();
                 String direction = player.getDirection();
-                movePlayerOnScreen(cachedPlayer.getCurrentLocation(), newPlayerLocation, direction);
+                movePlayerOnScreen(cachedPlayer.getLocation(), newPlayerLocation, direction);
                 Cache.updatePlayer(player);
             }
         }
@@ -98,21 +98,23 @@ public class Gui extends Application {
         Map<Integer, Shell> cachedShells = Cache.getShells();
         for (Shell s : shells.values()) {
             if (!cachedShells.containsKey(s.getId())) {
+                System.out.println("Shell added");
                 // Add new shell
                 Cache.updateShell(s);
-                placeShellOnScreen(s.getCurrentLocation());
+                placeShellOnScreen(s.getLocation());
             }
         }
         for (Shell cachedShell : cachedShells.values()) {
             Shell shell = shells.get(cachedShell.getId());
             if (shell == null) {
+                System.out.println("Shell removed");
                 // Remove shell
                 Cache.removeShell(cachedShell.getId());
-                removeGameObjectFromScreen(cachedShell.getCurrentLocation());
-            } else if (!shell.getCurrentLocation().equals(cachedShell.getCurrentLocation())) {
+                removeGameObjectFromScreen(cachedShell.getLocation());
+            } else if (!shell.getLocation().equals(cachedShell.getLocation())) {
                 // Move shell
-                Location newShellLocation = shell.getCurrentLocation();
-                moveShellOnScreen(cachedShell.getCurrentLocation(), newShellLocation);
+                Location newShellLocation = shell.getLocation();
+                moveShellOnScreen(cachedShell.getLocation(), newShellLocation);
                 Cache.updateShell(shell);
             }
         }
