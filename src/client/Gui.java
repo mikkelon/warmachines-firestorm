@@ -17,8 +17,7 @@ import javafx.stage.Stage;
 import model.GameConstants;
 import model.Location;
 import model.Player;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import model.Shell;
 
 import java.util.*;
 
@@ -31,6 +30,7 @@ public class Gui extends Application {
     public static Image image_floor;
     public static Image image_wall;
     public static Image hero_right, hero_left, hero_up, hero_down;
+    public static Image shell;
 
 
     private static Label[][] fields;
@@ -64,12 +64,17 @@ public class Gui extends Application {
         }
     }
 
-    public static void updateGame(Map<String, Player> players) {
+    public static void updateGame(Map<String, Player> players, Map<Integer, Shell> shells) {
+        updatePlayers(players);
+        updateShells(shells);
+    }
+
+    public static void updatePlayers(Map<String, Player> players) {
         Map<String, Player> cachedPlayers = Cache.getPlayers();
         for (Player p : players.values()) {
             if (!cachedPlayers.containsKey(p.getName())) {
                 // Add new player
-                Cache.addPlayer(p);
+                Cache.updatePlayer(p);
                 placePlayerOnScreen(p.getCurrentLocation(), p.getDirection());
             }
         }
@@ -78,7 +83,7 @@ public class Gui extends Application {
             if (player == null) {
                 // Remove player
                 Cache.removePlayer(cachedPlayer.getName());
-                removePlayerOnScreen(cachedPlayer.getCurrentLocation());
+                removeGameObjectFromScreen(cachedPlayer.getCurrentLocation());
             } else if (!player.getCurrentLocation().equals(cachedPlayer.getCurrentLocation())) {
                 // Move player
                 Location newPlayerLocation = player.getCurrentLocation();
@@ -89,7 +94,31 @@ public class Gui extends Application {
         }
     }
 
-    public static void removePlayerOnScreen(Location oldpos) {
+    public static void updateShells(Map<Integer, Shell> shells) {
+        Map<Integer, Shell> cachedShells = Cache.getShells();
+        for (Shell s : shells.values()) {
+            if (!cachedShells.containsKey(s.getId())) {
+                // Add new shell
+                Cache.updateShell(s);
+                placeShellOnScreen(s.getCurrentLocation());
+            }
+        }
+        for (Shell cachedShell : cachedShells.values()) {
+            Shell shell = shells.get(cachedShell.getId());
+            if (shell == null) {
+                // Remove shell
+                Cache.removeShell(cachedShell.getId());
+                removeGameObjectFromScreen(cachedShell.getCurrentLocation());
+            } else if (!shell.getCurrentLocation().equals(cachedShell.getCurrentLocation())) {
+                // Move shell
+                Location newShellLocation = shell.getCurrentLocation();
+                moveShellOnScreen(cachedShell.getCurrentLocation(), newShellLocation);
+                Cache.updateShell(shell);
+            }
+        }
+    }
+
+    public static void removeGameObjectFromScreen(Location oldpos) {
         Platform.runLater(() -> {
             fields[oldpos.getX()][oldpos.getY()].setGraphic(new ImageView(image_floor));
         });
@@ -119,8 +148,21 @@ public class Gui extends Application {
     }
 
     public static void movePlayerOnScreen(Location oldpos, Location newpos, String direction) {
-        removePlayerOnScreen(oldpos);
+        removeGameObjectFromScreen(oldpos);
         placePlayerOnScreen(newpos, direction);
+    }
+
+    public static void placeShellOnScreen(Location newpos) {
+        Platform.runLater(() -> {
+            int newx = newpos.getX();
+            int newy = newpos.getY();
+            fields[newx][newy].setGraphic(new ImageView(shell));
+        });
+    }
+
+    public static void moveShellOnScreen(Location oldpos, Location newpos) {
+        removeGameObjectFromScreen(oldpos);
+        placeShellOnScreen(newpos);
     }
 
     @Override
@@ -150,6 +192,8 @@ public class Gui extends Application {
             hero_left = new Image(getClass().getResourceAsStream("assets/tank1-left.png"), size, size, false, false);
             hero_up = new Image(getClass().getResourceAsStream("assets/tank1-up.png"), size, size, false, false);
             hero_down = new Image(getClass().getResourceAsStream("assets/tank1-down.png"), size, size, false, false);
+
+            shell = new Image(getClass().getResourceAsStream("assets/image/fireDown.png"), size, size, false, false);
 
             drawMap();
             scoreList.setEditable(false);

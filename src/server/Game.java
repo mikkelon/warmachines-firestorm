@@ -16,6 +16,7 @@ public class Game {
     private static List<DataOutputStream> outputStreams = new ArrayList<>();
     private static Set<String> takenNames = new HashSet<>();
     private static Player loggedOutPlayer = null;
+    private static int shellId = 0;
 
 
     synchronized public static void addThread(PlayerThread playerThread, String name) {
@@ -138,7 +139,7 @@ public class Game {
     public static void fire(Player player) {
         Location location = player.getCurrentLocation();
         String direction = player.getDirection();
-        Shell shell = new Shell(location, direction);
+        Shell shell = new Shell(shellId++, location, direction);
         shells.add(shell);
 
     }

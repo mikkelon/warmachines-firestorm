@@ -2,6 +2,7 @@ package client;
 
 import model.Location;
 import model.Player;
+import model.Shell;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -68,6 +69,24 @@ public class CommunicationThread extends Thread {
         return players;
     }
 
+    public static Map<Integer, Shell> parseShells(String json) {
+        Map<Integer, Shell> shells = new HashMap<>();
+        JSONObject jsonObject = new JSONObject(json);
+        JSONArray jsonShells = jsonObject.getJSONArray("shells");
+
+        for (int i = 0; i < jsonShells.length(); i++) {
+            JSONObject jsonShell = jsonShells.getJSONObject(i);
+            int id = jsonShell.getInt("id");
+            JSONObject currentLocation = jsonShell.getJSONObject("currentLocation");
+            int x = currentLocation.getInt("x");
+            int y = currentLocation.getInt("y");
+            String direction = jsonShell.getString("direction");
+            shells.put(id, new Shell(id, new Location(x, y), direction));
+        }
+
+        return shells;
+    }
+
     @Override
     public void run() {
         try {
@@ -81,7 +100,8 @@ public class CommunicationThread extends Thread {
                 String updateFromServer = inFromServer.readLine();
                 System.out.println(updateFromServer);
                 Map<String, Player> players = parsePlayers(updateFromServer);
-                Gui.updateGame(players);
+                Map<Integer, Shell> shells = parseShells(updateFromServer);
+                Gui.updateGame(players, shells);
             }
         } catch (SocketException e) {
             System.out.println("Connection to server lost");
