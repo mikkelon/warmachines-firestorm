@@ -85,7 +85,8 @@ public class Gui extends Application {
                 // Remove player
                 Cache.removePlayer(cachedPlayer.getName());
                 removeGameObjectFromScreen(cachedPlayer.getLocation());
-            } else if (!player.getLocation().equals(cachedPlayer.getLocation())) {
+            } else if (!player.getLocation().equals(cachedPlayer.getLocation())
+                    || !player.getDirection().equals(cachedPlayer.getDirection())) {
                 // Move player
                 Location newPlayerLocation = player.getLocation();
                 String direction = player.getDirection();
