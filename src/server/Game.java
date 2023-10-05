@@ -148,6 +148,7 @@ public class Game {
         }*/
 
         Shell shell = new Shell(shellId, player.getLocation(), direction);
+        shell.setPlayer(player);
         shells.add(shell);
         Game.shellId++;
     }
@@ -168,10 +169,11 @@ public class Game {
         }
 
         boolean isWall = GameConstants.board[y + delta_y].charAt(x + delta_x) == 'w';
-        boolean isPlayer = getPlayerAt(x + delta_x, y + delta_y) != null;
+        Player player = getPlayerAt(x + delta_x, y + delta_y);
+        boolean isPlayer = player != null;
 
         if (isPlayer) {
-            // TODO: remove shell, transfer points
+            handleHit(shell.getPlayer(), player);
             shells.remove(shell);
         } else if (isWall) {
             shells.remove(shell);
@@ -180,6 +182,13 @@ public class Game {
             shell.setLocation(newpos);
         }
         updateClients();
+    }
+
+    public static void handleHit(Player shooter, Player target){
+        int targetPoints = (int)(Math.round(target.getPoint()*0.1));
+        shooter.addPoints(10 + targetPoints);
+        target.removePoints(targetPoints);
+
     }
 
     synchronized private static void updateClients() {

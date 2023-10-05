@@ -14,7 +14,7 @@ public class GameClient {
         String navn = inFromUser.readLine();
         System.out.println("Connecting to server...");
 
-        new CommunicationThread(navn, "localhost").start();
+        new CommunicationThread(navn, "10.10.139.145").start();
         Application.launch(Gui.class);
 
         CommunicationThread.disconnect();
