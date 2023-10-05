@@ -134,7 +134,7 @@ public class Game {
         return null;
     }
 
-    public static void fire(Player player) {
+    synchronized public static void fire(Player player) {
         String direction = player.getDirection();/*
 
         int x = player.getXpos(), y = player.getYpos();
@@ -156,7 +156,7 @@ public class Game {
         return shells;
     }
 
-    public static void moveShell(Shell shell) {
+    synchronized public static void moveShell(Shell shell) {
         int x = shell.getXpos(), y = shell.getYpos();
         int delta_x = 0, delta_y = 0;
 
@@ -182,7 +182,7 @@ public class Game {
         updateClients();
     }
 
-    private static void updateClients() {
+    synchronized private static void updateClients() {
         try {
             DataTransferObject dataTransferObject = new DataTransferObject(players, shells);
             JSONObject jsonObject = new JSONObject(dataTransferObject);
