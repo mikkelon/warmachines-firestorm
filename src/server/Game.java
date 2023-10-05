@@ -162,10 +162,15 @@ public class Game {
         Location shellLocation = new Location(x + delta_x, y + delta_y);
 
         if (!isWall(shellLocation)) {
-            Shell shell = new Shell(shellId, shellLocation, direction);
-            shell.setPlayer(player);
-            shells.add(shell);
-            Game.shellId++;
+            Player playerAtShellLocation = getPlayerAt(shellLocation.getX(), shellLocation.getY());
+            if (playerAtShellLocation != null) {
+                handleHit(player, playerAtShellLocation);
+            } else {
+                Shell shell = new Shell(shellId, shellLocation, direction);
+                shell.setPlayer(player);
+                shells.add(shell);
+                Game.shellId++;
+            }
             updateClients();
         }
     }
@@ -217,7 +222,7 @@ public class Game {
     }
 
     public static void handleHit(Player shooter, Player target){
-        double killPercentage = 0.5;
+        double killPercentage = 0.1;
         int targetPoints = (int)(Math.round(target.getPoints() * killPercentage));
         shooter.addPoints(10 + targetPoints);
         target.removePoints(targetPoints);
