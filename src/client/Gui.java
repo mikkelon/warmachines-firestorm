@@ -85,9 +85,7 @@ public class Gui extends Application {
                 // Remove player
                 Cache.removePlayer(cachedPlayer.getName());
                 removeGameObjectFromScreen(cachedPlayer.getLocation());
-            } else if (!player.getLocation().equals(cachedPlayer.getLocation())
-                    || !player.getDirection().equals(cachedPlayer.getDirection())
-                    || player.getPoints() != cachedPlayer.getPoints()) {
+            } else if (doesPlayerNeedUpdate(cachedPlayer, player)) {
                 // Move player
                 Location newPlayerLocation = player.getLocation();
                 String direction = player.getDirection();
@@ -95,6 +93,12 @@ public class Gui extends Application {
                 Cache.updatePlayer(player);
             }
         }
+    }
+
+    private static boolean doesPlayerNeedUpdate(Player cachedPlayer, Player player) {
+        return !player.getLocation().equals(cachedPlayer.getLocation())
+                || !player.getDirection().equals(cachedPlayer.getDirection())
+                || player.getPoints() != cachedPlayer.getPoints();
     }
 
     public static void updateShells(Map<Integer, Shell> shells) {
