@@ -16,6 +16,7 @@ public class Game {
     private static List<DataOutputStream> outputStreams = new ArrayList<>();
     private static Set<String> takenNames = new HashSet<>();
     private static int shellId = 0;
+    private static boolean lastShellRemoved = false;
 
 
     synchronized public static void addThread(PlayerThread playerThread, String name) {
@@ -157,31 +158,43 @@ public class Game {
         return shells;
     }
 
-    synchronized public static void moveShell(Shell shell) {
-        int x = shell.getXpos(), y = shell.getYpos();
-        int delta_x = 0, delta_y = 0;
+    synchronized public static void moveShells() {
+        if (!shells.isEmpty()) {
+            ArrayList<Shell> shellsCopy= new ArrayList<>(shells);
+            for(Shell shell : shellsCopy){
+                int x = shell.getXpos(), y = shell.getYpos();
+                int delta_x = 0, delta_y = 0;
 
-        switch (shell.getDirection()) {
-            case "up" -> delta_y = -1;
-            case "down" -> delta_y = 1;
-            case "left" -> delta_x = -1;
-            case "right" -> delta_x = 1;
+                switch (shell.getDirection()) {
+                    case "up" -> delta_y = -1;
+                    case "down" -> delta_y = 1;
+                    case "left" -> delta_x = -1;
+                    case "right" -> delta_x = 1;
+                }
+
+                boolean isWall = GameConstants.board[y + delta_y].charAt(x + delta_x) == 'w';
+                Player player = getPlayerAt(x + delta_x, y + delta_y);
+                boolean isPlayer = player != null;
+
+                if (isPlayer) {
+                    handleHit(shell.getPlayer(), player);
+                    shells.remove(shell);
+                } else if (isWall) {
+                    shells.remove(shell);
+                } else {
+                    Location newpos = new Location(x + delta_x, y + delta_y);
+                    shell.setLocation(newpos);
+                }
+
+                if (shells.isEmpty() && !lastShellRemoved) {
+                    lastShellRemoved = true;
+                }
+            }
+            updateClients();
+        } else if(lastShellRemoved) {
+            lastShellRemoved = false;
+            updateClients();
         }
-
-        boolean isWall = GameConstants.board[y + delta_y].charAt(x + delta_x) == 'w';
-        Player player = getPlayerAt(x + delta_x, y + delta_y);
-        boolean isPlayer = player != null;
-
-        if (isPlayer) {
-            handleHit(shell.getPlayer(), player);
-            shells.remove(shell);
-        } else if (isWall) {
-            shells.remove(shell);
-        } else {
-            Location newpos = new Location(x + delta_x, y + delta_y);
-            shell.setLocation(newpos);
-        }
-        updateClients();
     }
 
     public static void handleHit(Player shooter, Player target){
