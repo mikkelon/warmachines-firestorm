@@ -30,7 +30,7 @@ public class Gui extends Application {
     public static Image image_floor;
     public static Image image_wall;
     public static Image hero_right, hero_left, hero_up, hero_down;
-    public static Image shell;
+    public static Image shell_up, shell_down, shell_right, shell_left;
 
 
     private static Label[][] fields;
@@ -102,7 +102,7 @@ public class Gui extends Application {
             if (!cachedShells.containsKey(s.getId())) {
                 // Add new shell
                 Cache.updateShell(s);
-                placeShellOnScreen(s.getLocation());
+                placeShellOnScreen(s.getLocation(), s.getDirection());
             }
         }
         for (Shell cachedShell : cachedShells.values()) {
@@ -114,7 +114,7 @@ public class Gui extends Application {
             } else if (!shell.getLocation().equals(cachedShell.getLocation())) {
                 // Move shell
                 Location newShellLocation = shell.getLocation();
-                moveShellOnScreen(cachedShell.getLocation(), newShellLocation);
+                moveShellOnScreen(cachedShell.getLocation(), newShellLocation, shell.getDirection());
                 Cache.updateShell(shell);
             }
         }
@@ -154,17 +154,32 @@ public class Gui extends Application {
         placePlayerOnScreen(newpos, direction);
     }
 
-    public static void placeShellOnScreen(Location newpos) {
+    public static void placeShellOnScreen(Location newpos, String direction) {
         Platform.runLater(() -> {
             int newx = newpos.getX();
             int newy = newpos.getY();
-            fields[newx][newy].setGraphic(new ImageView(shell));
+            if (direction.equals("right")) {
+                fields[newx][newy].setGraphic(new ImageView(shell_right));
+            }
+            ;
+            if (direction.equals("left")) {
+                fields[newx][newy].setGraphic(new ImageView(shell_left));
+            }
+            ;
+            if (direction.equals("up")) {
+                fields[newx][newy].setGraphic(new ImageView(shell_up));
+            }
+            ;
+            if (direction.equals("down")) {
+                fields[newx][newy].setGraphic(new ImageView(shell_down));
+            }
+            ;
         });
     }
 
-    public static void moveShellOnScreen(Location oldpos, Location newpos) {
+    public static void moveShellOnScreen(Location oldpos, Location newpos, String direction) {
         removeGameObjectFromScreen(oldpos);
-        placeShellOnScreen(newpos);
+        placeShellOnScreen(newpos, direction);
     }
 
     @Override
@@ -188,14 +203,17 @@ public class Gui extends Application {
             boardGrid = new GridPane();
 
             image_wall = new Image(getClass().getResourceAsStream("assets/wall-brick2.png"), size, size, false, false);
-            image_floor = new Image(getClass().getResourceAsStream("assets/wall-stone.png"), size, size, false, false);
+            image_floor = new Image(getClass().getResourceAsStream("assets/grass/grass.png"), size, size, false, false);
 
-            hero_right = new Image(getClass().getResourceAsStream("assets/tank1-right.png"), size, size, false, false);
-            hero_left = new Image(getClass().getResourceAsStream("assets/tank1-left.png"), size, size, false, false);
-            hero_up = new Image(getClass().getResourceAsStream("assets/tank1-up.png"), size, size, false, false);
-            hero_down = new Image(getClass().getResourceAsStream("assets/tank1-down.png"), size, size, false, false);
+            hero_right = new Image(getClass().getResourceAsStream("assets/grass/tank1-right.png"), size, size, false, false);
+            hero_left = new Image(getClass().getResourceAsStream("assets/grass/tank1-left.png"), size, size, false, false);
+            hero_up = new Image(getClass().getResourceAsStream("assets/grass/tank1-up.png"), size, size, false, false);
+            hero_down = new Image(getClass().getResourceAsStream("assets/grass/tank1-down.png"), size, size, false, false);
 
-            shell = new Image(getClass().getResourceAsStream("assets/image/fireDown.png"), size, size, false, false);
+            shell_up = new Image(getClass().getResourceAsStream("assets/grass/shell1-up.png"), size, size, false, false);
+            shell_down = new Image(getClass().getResourceAsStream("assets/grass/shell1-down.png"), size, size, false, false);
+            shell_right = new Image(getClass().getResourceAsStream("assets/grass/shell1-right.png"), size, size, false, false);
+            shell_left = new Image(getClass().getResourceAsStream("assets/grass/shell1-left.png"), size, size, false, false);
 
             drawMap();
             scoreList.setEditable(false);
