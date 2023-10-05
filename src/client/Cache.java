@@ -16,6 +16,7 @@ public class Cache {
     }
 
     public static void updatePlayer(Player player) {
+        System.out.println(player.getName() + ": " + player.getPoints());
         players.put(player.getName(), player);
     }
 

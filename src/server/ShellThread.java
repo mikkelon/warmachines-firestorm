@@ -16,7 +16,7 @@ public class ShellThread extends Thread {
                 for(Shell shell : shells){
                     Game.moveShell(shell);
                 }
-                Thread.sleep(70);
+                Thread.sleep(40);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

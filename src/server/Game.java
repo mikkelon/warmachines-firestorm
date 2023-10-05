@@ -185,10 +185,11 @@ public class Game {
     }
 
     public static void handleHit(Player shooter, Player target){
-        int targetPoints = (int)(Math.round(target.getPoints()*0.1));
+        double killPercentage = 0.5;
+        int targetPoints = (int)(Math.round(target.getPoints() * killPercentage));
         shooter.addPoints(10 + targetPoints);
         target.removePoints(targetPoints);
-
+        target.setLocation(getRandomFreePosition());
     }
 
     synchronized private static void updateClients() {
