@@ -16,8 +16,6 @@ public class Game {
     private static List<DataOutputStream> outputStreams = new ArrayList<>();
     private static Set<String> takenNames = new HashSet<>();
     private static int shellId = 0;
-    private static boolean lastShellRemoved = false;
-
 
     synchronized public static void addThread(PlayerThread playerThread, String name) {
         Location p = getRandomFreePosition();
@@ -88,18 +86,31 @@ public class Game {
             case "right" -> delta_x = 1;
         }
 
-        boolean isWall = GameConstants.board[y + delta_y].charAt(x + delta_x) == 'w';
         boolean isPlayer = getPlayerAt(x + delta_x, y + delta_y) != null;
-        if (!isWall && !isPlayer) {
-            Location newpos = new Location(x + delta_x, y + delta_y);
-            player.setLocation(newpos);
-            shouldUpdateClients = true;
+        if (!isWall(x + delta_x, y + delta_y) && !isPlayer) {
+
+            // Check if player walks into a shell
+            Shell shellAtNewLocatiion = getShellAt(x + delta_x, y + delta_y);
+            if (shellAtNewLocatiion == null) {
+                Location newpos = new Location(x + delta_x, y + delta_y);
+                player.setLocation(newpos);
+                shouldUpdateClients = true;
+            }
         }
 
         // If player moved or changed direction, send update to all clients
         if (shouldUpdateClients) {
             updateClients();
         }
+    }
+
+    private static boolean isWall(int x, int y) {
+        return GameConstants.board[y].charAt(x) == 'w';
+    }
+
+    private static boolean isWall(Location location) {
+        int x = location.getX(), y = location.getY();
+        return GameConstants.board[y].charAt(x) == 'w';
     }
 
     public static Location getRandomFreePosition()
@@ -136,7 +147,7 @@ public class Game {
     }
 
     synchronized public static void fire(Player player) {
-        String direction = player.getDirection();/*
+        String direction = player.getDirection();
 
         int x = player.getXpos(), y = player.getYpos();
         int delta_x = 0, delta_y = 0;
@@ -146,12 +157,17 @@ public class Game {
             case "down" -> delta_y = 1;
             case "left" -> delta_x = -1;
             case "right" -> delta_x = 1;
-        }*/
+        }
 
-        Shell shell = new Shell(shellId, player.getLocation(), direction);
-        shell.setPlayer(player);
-        shells.add(shell);
-        Game.shellId++;
+        Location shellLocation = new Location(x + delta_x, y + delta_y);
+
+        if (!isWall(shellLocation)) {
+            Shell shell = new Shell(shellId, shellLocation, direction);
+            shell.setPlayer(player);
+            shells.add(shell);
+            Game.shellId++;
+            updateClients();
+        }
     }
 
     public static List<Shell> getShells() {
@@ -160,8 +176,8 @@ public class Game {
 
     synchronized public static void moveShells() {
         if (!shells.isEmpty()) {
-            ArrayList<Shell> shellsCopy= new ArrayList<>(shells);
-            for(Shell shell : shellsCopy){
+            ArrayList<Shell> shellsCopy = new ArrayList<>(shells);
+            for (Shell shell : shellsCopy) {
                 int x = shell.getXpos(), y = shell.getYpos();
                 int delta_x = 0, delta_y = 0;
 
@@ -185,16 +201,19 @@ public class Game {
                     Location newpos = new Location(x + delta_x, y + delta_y);
                     shell.setLocation(newpos);
                 }
-
-                if (shells.isEmpty() && !lastShellRemoved) {
-                    lastShellRemoved = true;
-                }
             }
             updateClients();
-        } else if(lastShellRemoved) {
-            lastShellRemoved = false;
-            updateClients();
         }
+
+    }
+
+    private static Shell getShellAt(int x, int y) {
+        for (Shell s : shells) {
+            if (s.getXpos() == x && s.getYpos() == y) {
+                return s;
+            }
+        }
+        return null;
     }
 
     public static void handleHit(Player shooter, Player target){
