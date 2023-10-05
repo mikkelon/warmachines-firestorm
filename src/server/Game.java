@@ -15,7 +15,7 @@ public class Game {
     private static List<Shell> shells = new ArrayList<>();
     private static List<DataOutputStream> outputStreams = new ArrayList<>();
     private static Set<String> takenNames = new HashSet<>();
-    private static Player loggedOutPlayer = null;
+    private static int shellId = 0;
 
 
     synchronized public static void addThread(PlayerThread playerThread, String name) {
@@ -70,7 +70,6 @@ public class Game {
     synchronized public static void removePlayer(Player player, DataOutputStream outputStream) {
         players.remove(player);
         outputStreams.remove(outputStream);
-        loggedOutPlayer = player;
         updateClients();
     }
 
@@ -92,7 +91,7 @@ public class Game {
         boolean isPlayer = getPlayerAt(x + delta_x, y + delta_y) != null;
         if (!isWall && !isPlayer) {
             Location newpos = new Location(x + delta_x, y + delta_y);
-            player.setCurrentLocation(newpos);
+            player.setLocation(newpos);
             shouldUpdateClients = true;
         }
 
@@ -135,19 +134,29 @@ public class Game {
         return null;
     }
 
-    public static void fire(Player player) {
-        Location location = player.getCurrentLocation();
-        String direction = player.getDirection();
-        Shell shell = new Shell(location, direction);
-        shells.add(shell);
+    synchronized public static void fire(Player player) {
+        String direction = player.getDirection();/*
 
+        int x = player.getXpos(), y = player.getYpos();
+        int delta_x = 0, delta_y = 0;
+
+        switch (direction) {
+            case "up" -> delta_y = -1;
+            case "down" -> delta_y = 1;
+            case "left" -> delta_x = -1;
+            case "right" -> delta_x = 1;
+        }*/
+
+        Shell shell = new Shell(shellId, player.getLocation(), direction);
+        shells.add(shell);
+        Game.shellId++;
     }
 
     public static List<Shell> getShells() {
         return shells;
     }
 
-    public static void moveShell(Shell shell) {
+    synchronized public static void moveShell(Shell shell) {
         int x = shell.getXpos(), y = shell.getYpos();
         int delta_x = 0, delta_y = 0;
 
@@ -164,29 +173,23 @@ public class Game {
         if (isPlayer) {
             // TODO: remove shell, transfer points
             shells.remove(shell);
-
-
         } else if (isWall) {
-            // TODO: remove shell
             shells.remove(shell);
-
-
         } else {
             Location newpos = new Location(x + delta_x, y + delta_y);
-            shell.setCurrentLocation(newpos);
+            shell.setLocation(newpos);
         }
         updateClients();
     }
 
-    private static void updateClients() {
+    synchronized private static void updateClients() {
         try {
-            DataTransferObject dataTransferObject = new DataTransferObject(players, loggedOutPlayer, shells);
+            DataTransferObject dataTransferObject = new DataTransferObject(players, shells);
             JSONObject jsonObject = new JSONObject(dataTransferObject);
             System.out.println(jsonObject);
             for (DataOutputStream outputStream : outputStreams) {
                 outputStream.writeBytes(jsonObject + "\n");
             }
-            loggedOutPlayer = null;
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -17,12 +17,9 @@ import javafx.stage.Stage;
 import model.GameConstants;
 import model.Location;
 import model.Player;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import model.Shell;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class Gui extends Application {
 
@@ -33,11 +30,12 @@ public class Gui extends Application {
     public static Image image_floor;
     public static Image image_wall;
     public static Image hero_right, hero_left, hero_up, hero_down;
+    public static Image shell;
 
 
     private static Label[][] fields;
     private static GridPane boardGrid;
-    private TextArea scoreList;
+    private static TextArea scoreList;
 
 
     // -------------------------------------------
@@ -66,28 +64,62 @@ public class Gui extends Application {
         }
     }
 
-    public static void updateGame(JSONArray players, JSONObject loggedOutPlayer) {
-        if (loggedOutPlayer != null) {
-            Location playerLocation = new Location(loggedOutPlayer.getJSONObject("currentLocation").getInt("x"),
-                    loggedOutPlayer.getJSONObject("currentLocation").getInt("y"));
-            removePlayerOnScreen(playerLocation);
+    public static void updateGame(Map<String, Player> players, Map<Integer, Shell> shells) {
+        updatePlayers(players);
+        updateShells(shells);
+        updateScoreTable();
+    }
+
+    public static void updatePlayers(Map<String, Player> players) {
+        Map<String, Player> cachedPlayers = Cache.getPlayers();
+        for (Player p : players.values()) {
+            if (!cachedPlayers.containsKey(p.getName())) {
+                // Add new player
+                Cache.updatePlayer(p);
+                placePlayerOnScreen(p.getLocation(), p.getDirection());
+            }
         }
-
-        for (int i = 0; i < players.length(); i++) {
-            JSONObject jsonPlayer = players.getJSONObject(i); //
-
-            String direction = jsonPlayer.getString("direction");
-            JSONObject jsonCurrLoc = jsonPlayer.getJSONObject("currentLocation");
-            JSONObject jsonLastLoc = jsonPlayer.getJSONObject("lastLocation");
-            Location currLoc = new Location(jsonCurrLoc.getInt("x"), jsonCurrLoc.getInt("y"));
-            Location lastLoc = new Location(jsonLastLoc.getInt("x"), jsonLastLoc.getInt("y"));
-
-            // Flyt spilleren på skærmen
-            movePlayerOnScreen(lastLoc, currLoc, direction);
+        for (Player cachedPlayer : cachedPlayers.values()) {
+            Player player = players.get(cachedPlayer.getName());
+            if (player == null) {
+                // Remove player
+                Cache.removePlayer(cachedPlayer.getName());
+                removeGameObjectFromScreen(cachedPlayer.getLocation());
+            } else if (!player.getLocation().equals(cachedPlayer.getLocation())) {
+                // Move player
+                Location newPlayerLocation = player.getLocation();
+                String direction = player.getDirection();
+                movePlayerOnScreen(cachedPlayer.getLocation(), newPlayerLocation, direction);
+                Cache.updatePlayer(player);
+            }
         }
     }
 
-    public static void removePlayerOnScreen(Location oldpos) {
+    public static void updateShells(Map<Integer, Shell> shells) {
+        Map<Integer, Shell> cachedShells = Cache.getShells();
+        for (Shell s : shells.values()) {
+            if (!cachedShells.containsKey(s.getId())) {
+                // Add new shell
+                Cache.updateShell(s);
+                placeShellOnScreen(s.getLocation());
+            }
+        }
+        for (Shell cachedShell : cachedShells.values()) {
+            Shell shell = shells.get(cachedShell.getId());
+            if (shell == null) {
+                // Remove shell
+                Cache.removeShell(cachedShell.getId());
+                removeGameObjectFromScreen(cachedShell.getLocation());
+            } else if (!shell.getLocation().equals(cachedShell.getLocation())) {
+                // Move shell
+                Location newShellLocation = shell.getLocation();
+                moveShellOnScreen(cachedShell.getLocation(), newShellLocation);
+                Cache.updateShell(shell);
+            }
+        }
+    }
+
+    public static void removeGameObjectFromScreen(Location oldpos) {
         Platform.runLater(() -> {
             fields[oldpos.getX()][oldpos.getY()].setGraphic(new ImageView(image_floor));
         });
@@ -117,8 +149,21 @@ public class Gui extends Application {
     }
 
     public static void movePlayerOnScreen(Location oldpos, Location newpos, String direction) {
-        removePlayerOnScreen(oldpos);
+        removeGameObjectFromScreen(oldpos);
         placePlayerOnScreen(newpos, direction);
+    }
+
+    public static void placeShellOnScreen(Location newpos) {
+        Platform.runLater(() -> {
+            int newx = newpos.getX();
+            int newy = newpos.getY();
+            fields[newx][newy].setGraphic(new ImageView(shell));
+        });
+    }
+
+    public static void moveShellOnScreen(Location oldpos, Location newpos) {
+        removeGameObjectFromScreen(oldpos);
+        placeShellOnScreen(newpos);
     }
 
     @Override
@@ -149,6 +194,8 @@ public class Gui extends Application {
             hero_up = new Image(getClass().getResourceAsStream("assets/tank1-up.png"), size, size, false, false);
             hero_down = new Image(getClass().getResourceAsStream("assets/tank1-down.png"), size, size, false, false);
 
+            shell = new Image(getClass().getResourceAsStream("assets/image/fireDown.png"), size, size, false, false);
+
             drawMap();
             scoreList.setEditable(false);
 
@@ -162,48 +209,36 @@ public class Gui extends Application {
             primaryStage.setScene(scene);
             primaryStage.show();
 
-			scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
-				switch (event.getCode()) {
-				case UP:    CommunicationThread.writeToServer("move up");    break;
-				case DOWN:  CommunicationThread.writeToServer("move down");  break;
-				case LEFT:  CommunicationThread.writeToServer("move left");  break;
-				case RIGHT: CommunicationThread.writeToServer("move right"); break;
-				case SPACE: CommunicationThread.writeToServer("fire");      break;
-				case ESCAPE:System.exit(0);
-				default: break;
-				}
-			});
-			
-            // Putting default players on screen
-//			for (int i=0;i<GameLogic.players.size();i++) {
-//			  fields[GameLogic.players.get(i).getXpos()][GameLogic.players.get(i).getYpos()].setGraphic(new ImageView(hero_up));
-//			}
+            scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+                switch (event.getCode()) {
+                    case UP:    CommunicationThread.writeToServer("move up");    break;
+                    case DOWN:  CommunicationThread.writeToServer("move down");  break;
+                    case LEFT:  CommunicationThread.writeToServer("move left");  break;
+                    case RIGHT: CommunicationThread.writeToServer("move right"); break;
+                    case SPACE: CommunicationThread.writeToServer("fire");      break;
+                    case ESCAPE:System.exit(0);
+                    default: break;
+                }
+            });
+
             scoreList.setText(getScoreList());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void updateScoreTable() {
+    public static void updateScoreTable() {
         Platform.runLater(() -> {
             scoreList.setText(getScoreList());
         });
     }
 
-    public void playerMoved(int delta_x, int delta_y, String direction) {
-//		GameLogic.updatePlayer(delta_x,delta_y,direction);
-//		updateScoreTable();
+    public static String getScoreList() {
+		StringBuffer b = new StringBuffer(100);
+		for (Player p : Cache.getPlayers().values()) {
+			b.append(p+"\r\n");
+		}
+		return b.toString();
     }
-
-    public String getScoreList() {
-//		StringBuffer b = new StringBuffer(100);
-//		for (Player p : GameLogic.players) {
-//			b.append(p+"\r\n");
-//		}
-//		return b.toString();
-        return null;
-    }
-
-
 }
 

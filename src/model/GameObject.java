@@ -1,27 +1,20 @@
 package model;
 
 public abstract class GameObject {
-    private Location lastLocation;
-    private Location currentLocation;
+    private Location location;
     private String direction;
 
     public GameObject(Location location, String direction) {
-        this.currentLocation = location;
-        this.lastLocation = location;
+        this.location = location;
         this.direction = direction;
     }
 
-    public Location getLastLocation() {
-        return lastLocation;
+    public Location getLocation() {
+        return location;
     }
 
-    public Location getCurrentLocation() {
-        return currentLocation;
-    }
-
-    public void setCurrentLocation(Location location) {
-        this.lastLocation = this.currentLocation;
-        this.currentLocation = location;
+    public void setLocation(Location location) {
+        this.location = location;
     }
 
     public String getDirection() {
@@ -33,15 +26,15 @@ public abstract class GameObject {
     }
 
     public int getXpos() {
-        return currentLocation.x;
+        return location.x;
     }
     public void setXpos(int xpos) {
-        this.currentLocation.x = xpos;
+        this.location.x = xpos;
     }
     public int getYpos() {
-        return currentLocation.y;
+        return location.y;
     }
     public void setYpos(int ypos) {
-        this.currentLocation.y = ypos;
+        this.location.y = ypos;
     }
 }
