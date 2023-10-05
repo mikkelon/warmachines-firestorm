@@ -14,8 +14,8 @@ public class PlayerThread extends Thread {
     private final Socket connenctionSocket;
     private final BufferedReader inFromClient;
     private final DataOutputStream outToClient;
-    private final int MOVE_DELAY = 100;
-    private final int FIRE_DELAY = 500;
+    private final int MOVE_DELAY = 25;
+    private final int FIRE_DELAY = 250;
     private Player player;
     private Date lastMove = new Date();
     private Date lastFire = new Date();
