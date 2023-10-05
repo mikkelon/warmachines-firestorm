@@ -4,9 +4,7 @@ import model.Location;
 import model.Player;
 import model.Shell;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
-import server.DataTransferObject;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -63,7 +61,10 @@ public class CommunicationThread extends Thread {
             int x = location.getInt("x");
             int y = location.getInt("y");
             String direction = jsonPlayer.getString("direction");
-            players.put(name, new Player(name, new Location(x, y), direction));
+            int points = jsonPlayer.getInt("points");
+            Player player = new Player(name, new Location(x, y), direction);
+            player.setPoints(points);
+            players.put(name,player);
         }
 
         return players;

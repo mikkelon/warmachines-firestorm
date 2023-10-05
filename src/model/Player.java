@@ -5,30 +5,30 @@ import java.util.List;
 
 public class Player extends GameObject {
 	private String name;
-	private int point;
+	private int points;
 	private List<Shell> firedShells = new ArrayList<>();
 
 	public Player(String name, Location location, String direction) {
 		super(location, direction);
 		this.name = name;
-		this.point = 0;
+		this.points = 0;
 	}
 
 	public String getName() {
 		return name;
 	}
 	public void addPoints(int p) {
-		point+=p;
+		points +=p;
 	}
-	public int getPoint() {
-		return point;
+	public int getPoints() {
+		return points;
 	}
-	public void setPoint(int point) {
-		this.point = point;
+	public void setPoints(int points) {
+		this.points = points;
 	}
 
 	public void removePoints(int p) {
-		point-=p;
+		points -=p;
 	}
 
 	public List<Shell> getFiredShells() {
@@ -38,7 +38,7 @@ public class Player extends GameObject {
 		firedShells.add(shell);
 	}
 	public String toString() {
-		return name+":   "+point;
+		return name+":   "+ points;
 	}
 
 	@Override

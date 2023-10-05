@@ -185,7 +185,7 @@ public class Game {
     }
 
     public static void handleHit(Player shooter, Player target){
-        int targetPoints = (int)(Math.round(target.getPoint()*0.1));
+        int targetPoints = (int)(Math.round(target.getPoints()*0.1));
         shooter.addPoints(10 + targetPoints);
         target.removePoints(targetPoints);
 
