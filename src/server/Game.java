@@ -14,51 +14,15 @@ public class Game {
     private static List<Player> players = new ArrayList<>();
     private static List<Shell> shells = new ArrayList<>();
     private static List<DataOutputStream> outputStreams = new ArrayList<>();
-    private static Set<String> takenNames = new HashSet<>();
     private static int shellId = 0;
 
     synchronized public static void addThread(PlayerThread playerThread, String name) {
         Location p = getRandomFreePosition();
-        Player player = new Player(checkNameAvailability(name), p, "up");
+        Player player = new Player(NameGenerator.checkNameAvailability(name), p, "up");
         players.add(player);
         playerThread.setPlayer(player);
         outputStreams.add(playerThread.getOutputStream());
         updateClients();
-    }
-
-    /**
-     * Tjekker om navnet er ledigt. Hvis ikke navnet er ledigt, vælges en tilfældig kombination af to ord.
-     * Der er 132 kombinationer af to ord, så der er en god chance for at finde et ledigt navn.
-     * @param name Navnet der skal tjekkes
-     * @return Navnet hvis det er ledigt, ellers et nyt navn
-     */
-    private static String checkNameAvailability(String name) {
-        if (name.isBlank()) {
-            name = generateRandomName();
-        }
-
-        while (takenNames.contains(name)) {
-            name = generateRandomName();
-        }
-
-        System.out.println("Player was assigned name: " + name);
-        takenNames.add(name);
-        return name;
-    }
-
-    private static String generateRandomName() {
-        String[] words = {
-                "Cactus", "Pickle", "Dragon", "Unicorn", "Ninja", "Pirate", "Robot", "Wizard", "Samurai", "Vampire", "Ghost", "Zombie"
-        };
-
-        Random random = new Random();
-        String word1, word2;
-        do {
-            word1 = words[random.nextInt(words.length)];
-            word2 = words[random.nextInt(words.length)];
-        } while (word1.equals(word2));
-
-        return word1 + word2;
     }
 
     /**
