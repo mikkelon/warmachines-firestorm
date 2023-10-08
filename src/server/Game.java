@@ -1,6 +1,5 @@
 package server;
 
-import model.GameConstants;
 import model.Location;
 import model.Player;
 import model.Shell;
@@ -12,10 +11,10 @@ import java.util.*;
 
 public class Game {
 
-    private static List<Player> players = new ArrayList<>();
-    private static List<Shell> shells = new ArrayList<>();
+    private static final List<Player> players = new ArrayList<>();
+    private static final List<Shell> shells = new ArrayList<>();
     public static int shellId = 0;
-    private static List<DataOutputStream> outputStreams = new ArrayList<>();
+    private static final List<DataOutputStream> outputStreams = new ArrayList<>();
 
     synchronized public static void addThread(PlayerThread playerThread, String name) {
         Location p = MovementHandler.getRandomFreePosition();

@@ -13,25 +13,14 @@ public class MovementHandler {
     synchronized public static boolean movePlayer(Player player, String direction) {
         boolean shouldUpdateClients = !player.getDirection().equals(direction);
         player.setDirection(direction);
+        Location newLocation = calcNewLocation(player.getLocation(), direction);
 
-        int x = player.getXpos(), y = player.getYpos();
-        int delta_x = 0, delta_y = 0;
-
-        switch (direction) {
-            case "up" -> delta_y = -1;
-            case "down" -> delta_y = 1;
-            case "left" -> delta_x = -1;
-            case "right" -> delta_x = 1;
-        }
-
-        if (!CollisionDetector.isWall(x + delta_x, y + delta_y)
-                && !CollisionDetector.isPlayer(x + delta_x, y + delta_y)) {
-
+        if (!CollisionDetector.isWall(newLocation)
+                && !CollisionDetector.isPlayer(newLocation)) {
             // Check if player walks into a shell
-            Shell shellAtNewLocatiion = getShellAt(x + delta_x, y + delta_y);
+            Shell shellAtNewLocatiion = getShellAt(newLocation.getX(), newLocation.getY());
             if (shellAtNewLocatiion == null) {
-                Location newpos = new Location(x + delta_x, y + delta_y);
-                player.setLocation(newpos);
+                player.setLocation(newLocation);
                 shouldUpdateClients = true;
             }
         }
@@ -45,26 +34,16 @@ public class MovementHandler {
         if (!shells.isEmpty()) {
             ArrayList<Shell> shellsCopy = new ArrayList<>(shells);
             for (Shell shell : shellsCopy) {
-                int x = shell.getXpos(), y = shell.getYpos();
-                int delta_x = 0, delta_y = 0;
-
-                switch (shell.getDirection()) {
-                    case "up" -> delta_y = -1;
-                    case "down" -> delta_y = 1;
-                    case "left" -> delta_x = -1;
-                    case "right" -> delta_x = 1;
-                }
-
-                Player player = getPlayerAt(x + delta_x, y + delta_y);
+                Location newLocation = calcNewLocation(shell.getLocation(), shell.getDirection());
+                Player player = getPlayerAt(newLocation.getX(), newLocation.getY());
 
                 if (player != null) {
                     handleHit(shell.getPlayer(), player);
                     shells.remove(shell);
-                } else if (CollisionDetector.isWall(x + delta_x, y + delta_y)) {
+                } else if (CollisionDetector.isWall(newLocation)) {
                     shells.remove(shell);
                 } else {
-                    Location newpos = new Location(x + delta_x, y + delta_y);
-                    shell.setLocation(newpos);
+                    shell.setLocation(newLocation);
                 }
             }
             return true;
@@ -74,18 +53,7 @@ public class MovementHandler {
 
     synchronized public static boolean fire(Player player) {
         String direction = player.getDirection();
-
-        int x = player.getXpos(), y = player.getYpos();
-        int delta_x = 0, delta_y = 0;
-
-        switch (direction) {
-            case "up" -> delta_y = -1;
-            case "down" -> delta_y = 1;
-            case "left" -> delta_x = -1;
-            case "right" -> delta_x = 1;
-        }
-
-        Location shellLocation = new Location(x + delta_x, y + delta_y);
+        Location shellLocation = calcNewLocation(player.getLocation(), player.getDirection());
 
         if (!CollisionDetector.isWall(shellLocation)) {
             Player playerAtShellLocation = getPlayerAt(shellLocation.getX(), shellLocation.getY());
@@ -102,7 +70,7 @@ public class MovementHandler {
         return false;
     }
 
-    public static void handleHit(Player shooter, Player target){
+    private static void handleHit(Player shooter, Player target){
         double killPercentage = 0.1;
         int targetPoints = (int)(Math.round(target.getPoints() * killPercentage));
         shooter.addPoints(10 + targetPoints);
@@ -150,5 +118,19 @@ public class MovementHandler {
         }
         Location p = new Location(x, y);
         return p;
+    }
+
+    private static Location calcNewLocation(Location location, String direction) {
+        int x = location.getX();
+        int y = location.getY();
+
+        switch (direction) {
+            case "up" -> y--;
+            case "down" -> y++;
+            case "left" -> x--;
+            case "right" -> x++;
+        }
+
+        return new Location(x, y);
     }
 }
