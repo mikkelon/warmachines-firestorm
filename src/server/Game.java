@@ -50,8 +50,8 @@ public class Game {
             case "right" -> delta_x = 1;
         }
 
-        boolean isPlayer = getPlayerAt(x + delta_x, y + delta_y) != null;
-        if (!isWall(x + delta_x, y + delta_y) && !isPlayer) {
+        if (!CollisionDetector.isWall(x + delta_x, y + delta_y)
+                && !CollisionDetector.isPlayer(x + delta_x, y + delta_y)) {
 
             // Check if player walks into a shell
             Shell shellAtNewLocatiion = getShellAt(x + delta_x, y + delta_y);
@@ -68,14 +68,7 @@ public class Game {
         }
     }
 
-    private static boolean isWall(int x, int y) {
-        return GameConstants.board[y].charAt(x) == 'w';
-    }
 
-    private static boolean isWall(Location location) {
-        int x = location.getX(), y = location.getY();
-        return GameConstants.board[y].charAt(x) == 'w';
-    }
 
     public static Location getRandomFreePosition()
     // finds a random new position which is not wall
@@ -125,7 +118,7 @@ public class Game {
 
         Location shellLocation = new Location(x + delta_x, y + delta_y);
 
-        if (!isWall(shellLocation)) {
+        if (!CollisionDetector.isWall(shellLocation)) {
             Player playerAtShellLocation = getPlayerAt(shellLocation.getX(), shellLocation.getY());
             if (playerAtShellLocation != null) {
                 handleHit(player, playerAtShellLocation);
@@ -157,14 +150,12 @@ public class Game {
                     case "right" -> delta_x = 1;
                 }
 
-                boolean isWall = GameConstants.board[y + delta_y].charAt(x + delta_x) == 'w';
                 Player player = getPlayerAt(x + delta_x, y + delta_y);
-                boolean isPlayer = player != null;
 
-                if (isPlayer) {
+                if (player != null) {
                     handleHit(shell.getPlayer(), player);
                     shells.remove(shell);
-                } else if (isWall) {
+                } else if (CollisionDetector.isWall(x + delta_x, y + delta_y)) {
                     shells.remove(shell);
                 } else {
                     Location newpos = new Location(x + delta_x, y + delta_y);
