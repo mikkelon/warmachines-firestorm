@@ -14,6 +14,6 @@ public class CollisionDetector {
     }
 
     public static boolean isPlayer(int x, int y) {
-        return Game.getPlayerAt(x, y) != null;
+        return MovementHandler.getPlayerAt(x, y) != null;
     }
 }
